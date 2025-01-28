@@ -62,7 +62,15 @@ const Layout = ({ children }: LayoutProps) => {
             </div>
           )}
 
-          <main>
+          <main    
+            style={{
+              padding: '20px',
+              position: 'relative', // Ensures content sits above background image
+              zIndex: 1,
+              background: 'url(/images/fade_lrc.jpg) center center / cover no-repeat', // Set the background image
+              height: '100%',
+              flex:1,
+            }}>
             <Nav />
             <MainDropdown />
             {children} 
