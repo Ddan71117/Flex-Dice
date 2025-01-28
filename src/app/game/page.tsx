@@ -5,7 +5,7 @@ import DiceCluster from '../components/DiceCluster';
 
 const GamePage: React.FC = () => {
   const [selectedAvatar, setSelectedAvatar] = useState<string | null>(null);
-  const [username, setUsername] = useState<string | null>(null);
+ 
 
   useEffect(() => {
     // Retrieve avatar from localStorage on page load
@@ -15,15 +15,7 @@ const GamePage: React.FC = () => {
     }
   }, []);
 
-  useEffect(() => {
-    // Retrieve avatar from localStorage on page load
-    const storedUsername = localStorage.getItem('username');
-    if (storedUsername) {
-      setUsername(username);
-    }
-  }, []);
-
-
+ 
   return (
     <div className="relative min-h-screen bg-transparent">
      {/* game logic here */ }
