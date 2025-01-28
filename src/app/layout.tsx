@@ -8,7 +8,7 @@ import DiceCluster from './components/DiceCluster'; // Import DiceCluster
 import AvatarCarousel from './components/AvatarCarousel'; // Import AvatarCarousel
 import { ReactNode } from "react";
 import { usePathname } from "next/navigation"; // Import usePathname
-import './styles/globals.css';
+//import './styles/globals.css';
 
 type LayoutProps = {
   children: ReactNode;
