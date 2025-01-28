@@ -31,7 +31,8 @@ const LoginPage: React.FC = () => {
     e.preventDefault();
     if (username === 'testuser' && password === 'password123') {
       setErrorMessage('');
-      setIsAuthenticated(true); // User is authenticated but not yet logged in
+      setIsAuthenticated(true);
+      localStorage.setItem('userName', username);
     } else {
       setErrorMessage('Invalid username or password');
     }
@@ -40,7 +41,7 @@ const LoginPage: React.FC = () => {
   // Handle avatar selection after login
   const handleAvatarSelection = (avatar: string) => {
     setSelectedAvatar(avatar);
-    setIsLoggedIn(true); // User is now fully logged in after selecting an avatar
+    setIsLoggedIn(true); 
     localStorage.setItem('isLoggedIn', 'true'); // Store login status
     localStorage.setItem('selectedAvatar', avatar); // Save avatar to localStorage
   };

@@ -10,12 +10,12 @@ const SignUpPage: React.FC = () => {
 
   const handleSignUp = (e: React.FormEvent) => {
     e.preventDefault();
-    // Here you can add logic for user registration
+    //  add logic for user registration
     if (email === '' || password === '') {
       setErrorMessage('Please fill in all fields.');
     } else {
       setErrorMessage('');
-      // Proceed with signup logic
+      // add  signup logic
     }
   };
 

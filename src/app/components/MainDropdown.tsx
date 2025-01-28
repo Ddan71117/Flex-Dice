@@ -8,11 +8,25 @@ const MainDropdown: React.FC = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [selectedAvatar, setSelectedAvatar] = useState<string | null>(null); // Store selected avatar state
+  const [username, setUsername] = useState<string | null>(null);
+  const [userEmail, setUserEmail] = useState<string | null>(null);
 
-  // Log the isLoggedIn state whenever it changes (for debugging purposes)
-  // useEffect(() => {
-  //   console.log("isLoggedIn state: ", isLoggedIn);
-  // }, [isLoggedIn]);
+useEffect(() => {
+ const storedUserEmail = localStorage.getItem('userEmail');
+ if (storedUserEmail) {
+   setUserEmail(storedUserEmail);
+ }
+}, []); 
+
+ // get usernamefrom local storage
+ useEffect(() => {
+  // Retrieve avatar from localStorage on page load
+  const storedUsername = localStorage.getItem('username');
+  if (storedUsername) {
+    setUsername(username);
+  }
+}, []);
+
 
   // Check if user is logged in on initial load (from localStorage)
   useEffect(() => {
@@ -69,7 +83,7 @@ const MainDropdown: React.FC = () => {
         {isLoggedIn && selectedAvatar ? (
           <img
             className="w-32 h-32 rounded-full"
-            src={selectedAvatar || "/images/baby_yoda.jpg"}
+            src={selectedAvatar}
             alt="User Avatar"
             width={48}
             height={48}
@@ -84,8 +98,8 @@ const MainDropdown: React.FC = () => {
         <div className="dropdown absolute left-10 top-16 z-50 mt-2 w-48 bg-white divide-y divide-gray-100 rounded-lg shadow-sm dark:bg-gray-700 dark:divide-gray-600">
           {isLoggedIn ? (
             <div className="px-4 py-3">
-              <span className="block text-sm text-gray-900 dark:text-white">UserNameHere</span>
-              <span className="block text-sm text-gray-500 truncate dark:text-gray-400">userNameEmail Here</span>
+              <span className="block text-sm text-gray-900 dark:text-white">{localStorage.getItem('username') || 'UserNameHere'}</span>
+              <span className="block text-sm text-gray-500 truncate dark:text-gray-400">{localStorage.getItem('userEmail') || 'test@gmail.com'}</span>
             </div>
           ) : (
             <ul className="py-2">
