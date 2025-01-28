@@ -1,7 +1,7 @@
 
 "use client";
 import React, { useState } from 'react';
-//import '../../styles/globals.css';
+import '../globals.css';
 
 const SignUpPage: React.FC = () => {
   const [email, setEmail] = useState('');

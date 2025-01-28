@@ -45,11 +45,16 @@ useEffect(() => {
 
   // Handle logout
   const handleLogout = () => {
-    setIsLoggedIn(false);
-    setSelectedAvatar(null); // Clear the avatar selection when logging out
     localStorage.removeItem('isLoggedIn');
     localStorage.removeItem('selectedAvatar');
+    localStorage.removeItem('username');
+    localStorage.removeItem('userEmail');
+    setIsLoggedIn(false);
+    setSelectedAvatar(null);
+    setUsername(null);
+    setUserEmail(null);
   };
+
 
   // Toggle the dropdown visibility
   const toggleDropdown = () => {
@@ -104,12 +109,12 @@ useEffect(() => {
           ) : (
             <ul className="py-2">
               <li>
-                <Link href="/game/login" className="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-500 dark:text-gray-200 dark:hover:bg-blue-600">
+                <Link href="/" className="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-500 dark:text-gray-200 dark:hover:bg-blue-600">
                   Login
                 </Link>
               </li>
               <li>
-                <Link href="/game/signup" className="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-500 dark:text-gray-200 dark:hover:bg-green-600">
+                <Link href="/signup" className="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-500 dark:text-gray-200 dark:hover:bg-green-600">
                   Signup
                 </Link>
               </li>
@@ -120,12 +125,14 @@ useEffect(() => {
           {isLoggedIn && (
             <ul className="py-2">
               <li>
-                <button
-                  onClick={handleLogout} // Handle logout
-                  className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white"
-                >
-                  Sign out
-                </button>
+              <Link href="/" passHref>
+          <button
+            onClick={handleLogout} // Handle logout
+            className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white"
+          >
+            Sign out
+          </button>
+        </Link>
               </li>
             </ul>
           )}
