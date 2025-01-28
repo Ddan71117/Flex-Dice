@@ -1,14 +1,14 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Nav from './components/Nav';
-import LiveChat from './components/LiveChat';
-import MainDropdown from './components/MainDropdown';
-import DiceCluster from './components/DiceCluster'; // Import DiceCluster
-import AvatarCarousel from './components/AvatarCarousel'; // Import AvatarCarousel
+import Nav from "./components/Nav";
+import LiveChat from "./components/LiveChat";
+import MainDropdown from "./components/MainDropdown";
+import DiceCluster from "./components/DiceCluster"; // Import DiceCluster
+import AvatarCarousel from "./components/AvatarCarousel"; // Import AvatarCarousel
 import { ReactNode } from "react";
 import { usePathname } from "next/navigation"; // Import usePathname
-//import './styles/globals.css';
+import "./globals.css";
 
 type LayoutProps = {
   children: ReactNode;
@@ -62,18 +62,20 @@ const Layout = ({ children }: LayoutProps) => {
             </div>
           )}
 
-          <main    
+          <main
             style={{
-              padding: '20px',
-              position: 'relative', // Ensures content sits above background image
+              padding: "20px",
+              position: "relative", // Ensures content sits above background image
               zIndex: 1,
-              background: 'url(/images/fade_lrc.jpg) center center / cover no-repeat', // Set the background image
-              height: '100%',
-              flex:1,
-            }}>
+              background:
+                "url(/images/fade_lrc.jpg) center center / cover no-repeat", // Set the background image
+              height: "100%",
+              flex: 1,
+            }}
+          >
             <Nav />
             <MainDropdown />
-            {children} 
+            {children}
           </main>
 
           <LiveChat />
