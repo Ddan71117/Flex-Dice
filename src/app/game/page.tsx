@@ -14,7 +14,7 @@ export default function Game() {
       { id: 2, chips: 3 },
       { id: 3, chips: 3 },
       { id: 4, chips: 3 },
-      { id: 0, chips: 0}
+      { id: 0, chips: 0 }
     ]);
     const [currentPlayerIndex, setCurrentPlayerIndex] = useState(0);
     const [gameLog, setGameLog] = useState<string[]>([]);
