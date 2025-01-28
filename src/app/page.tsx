@@ -88,6 +88,12 @@ const LoginPage: React.FC = () => {
               >
                 Log In
               </button>
+              <div className="text-gray-400 text-sm mt-2">
+                <p>Don't have an account?{" "}</p>
+                <Link href="/signup" className="text-blue-400 hover:underline">
+                Sign up
+                </Link>
+              </div>
             </form>
           </>
         ) : (

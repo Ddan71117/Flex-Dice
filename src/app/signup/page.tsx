@@ -8,14 +8,33 @@ const SignUpPage: React.FC = () => {
   const [password, setPassword] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
 
-  const handleSignUp = (e: React.FormEvent) => {
+  const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
-    //  add logic for user registration
-    if (email === '' || password === '') {
-      setErrorMessage('Please fill in all fields.');
-    } else {
-      setErrorMessage('');
-      // add  signup logic
+  
+    if (email === "" || password === "") {
+      setErrorMessage("Please fill in all fields.");
+      return;
+    }
+  
+    try {
+      const response = await fetch("/api/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+  
+      if (response.ok) {
+        const data = await response.json();
+        localStorage.setItem("token", data.token); // Store the JWT token in localStorage
+        setErrorMessage("");
+        alert("User registered successfully!");
+      } else {
+        const errorData = await response.json();
+        setErrorMessage(errorData.message);
+      }
+    } catch (error) {
+      console.error(error);
+      setErrorMessage("An error occurred. Please try again.");
     }
   };
 
