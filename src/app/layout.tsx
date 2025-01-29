@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Nav from "./components/Nav";
-import LiveChat from "./components/LiveChat";
+import ChatBox from "./components/ChatBox";
 import MainDropdown from "./components/MainDropdown";
 import DiceCluster from "./components/DiceCluster"; // Import DiceCluster
 import AvatarCarousel from "./components/AvatarCarousel"; // Import AvatarCarousel
@@ -76,9 +76,10 @@ const Layout = ({ children }: LayoutProps) => {
             <Nav />
             <MainDropdown />
             {children}
+           
           </main>
-
-          <LiveChat />
+          <ChatBox />
+          
         </div>
       </body>
     </html>
