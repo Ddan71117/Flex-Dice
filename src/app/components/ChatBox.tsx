@@ -5,13 +5,19 @@ import { socket } from "../lib/socketClient"; // assuming this is your socket co
 import ChatForm from "../components/ChatForm";
 import ChatMessage from "../components/ChatMessage";
 
-export default function LiveChat() {
+export default function ChatBox() {
   const [room, setRoom] = useState("");
   const [joined, setJoined] = useState(false);
   const [messages, setMessages] = useState<{ sender: string; message: string }[]>([]);
   const [userName, setUserName] = useState("");
 
   useEffect(() => {
+       // Retrieve the username from localStorage
+       const storedUserName = localStorage.getItem("userName");
+       if (storedUserName) {
+         setUserName(storedUserName);
+       }
+
     socket.on("message", (data) => {
       setMessages((prev) => [...prev, data]);
     });
@@ -44,13 +50,9 @@ export default function LiveChat() {
     {!joined ? (
       <div className="flex flex-col items-center">
         <h1 className="text-2xl  font-bold text-gray-900">Join a Chat Room</h1>
-        <input
-          type="text"
-          placeholder="Enter your name"
-          className="w-64 px-4 py-2 mb-4 border-2 text-black placeholder-gray-800 rounded-l"
-          value={userName}
-          onChange={(e) => setUserName(e.target.value)}
-        />
+        <div className="w-64 px-4 py-2 mb-4 border-2 text-black placeholder-gray-800 rounded-l bold text-lg bg-gray-200">
+           Player: {userName}
+          </div>
         <input
           type="text"
           placeholder="Enter room name"
