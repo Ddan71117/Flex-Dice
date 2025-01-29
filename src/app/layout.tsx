@@ -1,6 +1,8 @@
+
 import { ReactNode } from "react";
 import Nav from "./components/Nav";
 import { robotoMono } from "./fonts";
+
 import "./globals.css";
 
 type LayoutProps = {
