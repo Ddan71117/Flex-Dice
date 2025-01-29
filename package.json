@@ -11,7 +11,9 @@
   },
   "dependencies": {
     "@apollo/client": "^3.12.7",
+    "@vercel/postgres": "^0.10.0",
     "apollo-server-micro": "^3.13.0",
+    "bcrypt": "^5.1.1",
     "graphql": "^16.10.0",
     "jsonwebtoken": "^9.0.2",
     "next": "15.1.5",
