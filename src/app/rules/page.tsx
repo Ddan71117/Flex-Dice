@@ -1,5 +1,3 @@
-import AvatarDropdown from "../../components/MainDropdown";
-
 const Page = () => {
   return (
     <div className="relative min-h-screen bg-cover bg-center flex items-center justify-center">

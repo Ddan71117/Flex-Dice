@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState } from "react";
 
 interface AvatarCarouselProps {
@@ -20,7 +22,9 @@ const AvatarCarousel: React.FC<AvatarCarouselProps> = ({ onSelectAvatar }) => {
   };
 
   const prevAvatar = () => {
-    setCurrentIndex((prevIndex) => (prevIndex - 1 + avatars.length) % avatars.length);
+    setCurrentIndex(
+      (prevIndex) => (prevIndex - 1 + avatars.length) % avatars.length
+    );
   };
 
   // Handle avatar selection
@@ -28,7 +32,6 @@ const AvatarCarousel: React.FC<AvatarCarouselProps> = ({ onSelectAvatar }) => {
     const selectedAvatar = `/images/${avatars[currentIndex]}`;
     onSelectAvatar(selectedAvatar); // Pass selected avatar to parent component
   };
-
 
   return (
     <div className="avatar-carousel flex items-center justify-center space-x-4">
