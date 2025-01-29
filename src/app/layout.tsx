@@ -4,10 +4,11 @@ import { useState, useEffect } from "react";
 import Nav from "./components/Nav";
 import ChatBox from "./components/ChatBox";
 import MainDropdown from "./components/MainDropdown";
-import DiceCluster from "./components/DiceCluster"; // Import DiceCluster
-import AvatarCarousel from "./components/AvatarCarousel"; // Import AvatarCarousel
+import DiceCluster from "./components/DiceCluster"; 
+import AvatarCarousel from "./components/AvatarCarousel"; 
 import { ReactNode } from "react";
-import { usePathname } from "next/navigation"; // Import usePathname
+import { usePathname } from "next/navigation"; 
+import Stats from "./components/Stats";
 import "./globals.css";
 
 type LayoutProps = {
@@ -79,6 +80,7 @@ const Layout = ({ children }: LayoutProps) => {
            
           </main>
           <ChatBox />
+          <Stats />
           
         </div>
       </body>
