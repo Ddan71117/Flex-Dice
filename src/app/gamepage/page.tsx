@@ -1,6 +1,9 @@
 "use client";
 import { useState, useEffect } from 'react';
 import DiceCluster from '../components/DiceCluster';
+import ChatBox from '../components/ChatBox';
+import Stats from '../components/Stats';
+import MainDropdown from '../components/MainDropdown';
 
 
 const GamePage: React.FC = () => {
@@ -19,7 +22,9 @@ const GamePage: React.FC = () => {
   return (
     <div className="relative min-h-screen bg-transparent">
      {/* game logic here */ }
-
+   <ChatBox />
+   <Stats />
+   <MainDropdown />
     </div>
   );
 };

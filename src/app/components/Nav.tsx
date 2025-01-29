@@ -33,25 +33,25 @@ const Nav: React.FC = () => {
     <nav className="fixed top-0 left-0 w-full bg-gray-800 p-4 h-19 text-white flex justify-between items-center z-30">
       <div className="text-7xl font-semibold text-center">Flex-Dice</div>
       {/* Show DiceCluster only on the main page '/' if not logged in */}
-      {isMainPage && !isLoggedIn && (
+      {/* {isMainPage && !isLoggedIn && (
         <div className="">
           <MainDropdown />
         </div>
-      )}
+      )} */}
 
       {/* Show AvatarCarousel only on the login page '/login' */}
-      {isLoginPage && !isLoggedIn && (
+      {/* {isLoginPage && !isLoggedIn && (
         <div className="absolute inset-0 flex justify-center items-center">
           <AvatarCarousel onSelectAvatar={handleAvatarSelection} />
         </div>
-      )}
+      )} */}
 
       {/* On the signup page '/signup', show AvatarCarousel until the avatar is selected */}
-      {isSignupPage && !avatarSelected && (
+      {/* {isSignupPage && !avatarSelected && (
         <div className="absolute inset-0 flex justify-center items-center">
           <AvatarCarousel onSelectAvatar={handleAvatarSelection} />
         </div>
-      )}
+      )} */}
     </nav>
   );
 };
