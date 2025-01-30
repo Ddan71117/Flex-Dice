@@ -6,7 +6,7 @@
     "dev": "next dev --turbopack",
     "dev:socket": " ts-node server.mjs",
     "build": "next build",
-    "start": "next start",
+    "start": "next start && ts-node server.mjs",
     "lint": "next lint"
   },
   "dependencies": {

@@ -1,46 +1,43 @@
-import { createServer } from 'node:http';
-import next from 'next';
-import { Server } from 'socket.io';
 
-const dev = process.env.NODE_ENV !== 'production';
-const hostname = process.env.HOSTNAME || 'localhost';
-const port = parseInt(process.env.PORT || '3000', 10);
+// import { createServer } from 'node:http';
+// import next from 'next';
+// import { Server } from 'socket.io';
 
-const app = next({ dev, hostname, port });
-const handle = app.getRequestHandler();
+// const dev = process.env.NODE_ENV !== 'production';
+// const hostname = process.env.HOSTNAME || 'localhost';
+// const port = parseInt(process.env.PORT || '3000', 10);
 
-app.prepare().then(() => {
-    const httpServer = createServer(handle); // This will serve your Next.js app
+// const app = next({ dev, hostname, port });
+// const handle = app.getRequestHandler();
 
-    const io = new Server(httpServer); // Socket.io is attached to the same server
+// app.prepare().then(() => {
+//     const httpServer = createServer(handle); // This will serve your Next.js app
 
-    io.on("connection", (socket) => {
-        console.log(`user has connected: ${socket.id}`);
+//     const io = new Server(httpServer); // Socket.io is attached to the same server
 
-        socket.on("join-room", ({ room, username }) => {
-            if (!username) {
-                console.error("Username is missing!");
-                return;
-            }
-            console.log(`User ${username} is attempting to join room: ${room}`);
-            socket.join(room);
-            console.log(`User ${username} joined room: ${room}`);
-            socket.to(room).emit("user_joined", `${username} joined the room`);
-        });
+//     io.on("connection", (socket) => {
+//         console.log(`${username} has connected: ${socket.id}`);
 
-        socket.on("message", ({ room, message, sender }) => {
-            console.log(`message from ${sender}: in room ${room}: ${message}`);
-            socket.to(room).emit("message", { sender, message });
-        });
+//         socket.on("join-room", ({ room, username }) => {
+//             socket.join(room);
+//             console.log(`User ${username} joined room: ${room}`);
+//             socket.to(room).emit("user_joined", `${username} joined the room`);
+//         });
 
-        // Listen for when a user disconnects
-        socket.on("disconnect", () => {
-            console.log(`a user disconnected: ${socket.id}`);
-        });
-    });
+//         socket.on("message", ({ room, message, sender }) => {
+//             console.log(`message from ${sender}: in room ${room}: ${message}`);
+//             socket.to(room).emit("message", { sender, message });
+//         });
 
-    // Start the server to listen on the specified port
-    httpServer.listen(port, () => {
-        console.log(`Server running on http://localhost:${port}`);
-    });
-});
+//         // Listen for when a user disconnects
+//         socket.on("disconnect", () => {
+//             console.log(`a user disconnected: ${socket.id}`);
+//         });
+//     });
+
+//     // Start the server to listen on the specified port
+//     httpServer.listen(port, () => {
+//         console.log(`Server running on http://${hostname}:${port}`);
+//     });
+// });
+
