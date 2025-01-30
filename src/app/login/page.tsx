@@ -108,7 +108,7 @@ const LoginPage: React.FC = () => {
               <AvatarCarousel onSelectAvatar={handleAvatarSelection} />
               {/* Show Start Game button only after avatar is selected */}
               {selectedAvatar && (
-                <Link href={"/game"}>
+                <Link href={"/gamepage"}>
                   <button className="mt-4 bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700">
                     Start Game
                   </button>

@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import AvatarCarousel from "./AvatarCarousel"; // Import AvatarCarousel component
-import DiceCluster from "./DiceCluster";
+//import DiceCluster from "./DiceCluster";
 
 const MainDropdown: React.FC = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -83,10 +83,10 @@ const MainDropdown: React.FC = () => {
   }, []);
 
   return (
-    <div className="fixed top-20 left-10 z-40 flex items-center space-x-3">
+    <div className="fixed  left-1/2 z-40 flex items-center space-x-3">
       <button
         type="button"
-        className="avatar-btn flex text-sm bg-gray-800 rounded-full focus:ring-4 focus:ring-gray-300 dark:focus:ring-gray-600"
+         className="avatar-btn flex text-sm bg-gray-800 rounded-full outline-4 outline-red-500 outline-offset-2  focus:outline-none hover:ring-4 hover:ring-blue-800"
         onClick={toggleDropdown}
       >
         <span className="sr-only">Open user menu</span>
@@ -102,7 +102,7 @@ const MainDropdown: React.FC = () => {
           />
         ) : (
           /* Show DiceCluster only if logged out */
-          !isLoggedIn && <DiceCluster />
+          !isLoggedIn // && <DiceCluster />
         )}
       </button>
 
@@ -111,7 +111,7 @@ const MainDropdown: React.FC = () => {
           {isLoggedIn ? (
             <div className="px-4 py-3">
               <span className="block text-sm text-gray-900 dark:text-white">
-                {localStorage.getItem("username") || "UserNameHere"}
+                {localStorage.getItem("userName") || "UserNameHere"}
               </span>
               <span className="block text-sm text-gray-500 truncate dark:text-gray-400">
                 {localStorage.getItem("userEmail") || "test@gmail.com"}
