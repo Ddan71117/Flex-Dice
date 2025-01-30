@@ -7,8 +7,8 @@ import ChatMessage from "../components/ChatMessage";
 import "../globals.css";
 
 export default function ChatBox() {
-  // const [room, setRoom] = useState("");
-  const room = "Game Room";
+  const [room, setRoom] = useState("");
+  // const room = "Game Room";
   const [joined, setJoined] = useState(false);
   const [messages, setMessages] = useState<{ sender: string; message: string }[]>([]);
   const [userName, setUserName] = useState("");
@@ -59,16 +59,14 @@ export default function ChatBox() {
         <div className="w-64 px-4 py-2 mb-4 border-2 text-black placeholder-gray-800 rounded-l bold text-lg bg-gray-200">
            Player: {userName}
           </div>
-          <div className="w-64 px-4 py-2 mb-4 border-2 text-black placeholder-gray-800 rounded-l bold text-lg bg-gray-200">
-          {room}
-          </div>
-<!--         {/* <input
+
+        <input
           type="text"
           placeholder="Enter room name"
           value={room}
           onChange={(e) => setRoom(e.target.value)}
           className="w-64 px-4 py-2 mb-4 border-2 text-black placeholder-gray-800 rounded-lg"
-        /> */} -->
+
         <button
           className="p-2 mt-4 text-white bg-blue-500 rounded-lg"
           onClick={handleJoinRoom}
