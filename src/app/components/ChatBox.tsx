@@ -50,7 +50,7 @@ export default function ChatBox() {
     <div className="fixed bottom-4 left-4 w-50 max-w-3xl mx-auto p-4 bg-white border rounded-lg shadow-lg">
     {!joined ? (
       <div className="flex flex-col items-center">
-        <h1 className="text-2xl  font-bold text-gray-900">Join a Chat Room</h1>
+        <h1 className="text-2xl  font-bold text-gray-900">Join Room</h1>
         <div className="w-64 px-4 py-2 mb-4 border-2 text-black placeholder-gray-800 rounded-l bold text-lg bg-gray-200">
            Player: {userName}
           </div>
