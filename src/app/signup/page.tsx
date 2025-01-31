@@ -2,7 +2,9 @@
 
 import React, { useState } from "react";
 import Layout from "@/app/layout";
+import Link from "next/link";
 import { FaEye, FaEyeSlash } from "react-icons/fa"; 
+
 
 const SignUpPage: React.FC = () => {
   const [email, setEmail] = useState("");
@@ -111,6 +113,12 @@ const SignUpPage: React.FC = () => {
             >
               Sign Up
             </button>
+            <p className="text-gray-300 text-sm mt-4">
+              Already have an account?{" "}
+              <Link href="/login" className="text-blue-500">
+                Log In
+              </Link>
+            </p>
           </form>
         </div>
       </div>
