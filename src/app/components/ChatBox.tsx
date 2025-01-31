@@ -12,6 +12,7 @@ export default function ChatBox() {
   const [joined, setJoined] = useState(false);
   const [messages, setMessages] = useState<{ sender: string; message: string }[]>([]);
   const [userName, setUserName] = useState("");
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   // Fetch available rooms when the component mounts
   useEffect(() => {
@@ -78,93 +79,122 @@ export default function ChatBox() {
     setJoined(false);
   };
 
+  const openModal = () => {
+    setIsModalOpen(true); // Open modal
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false); // Close modal
+  };
+
+
   return (
-    <div className="fixed bottom-4 left-4 w-50 max-w-3xl mx-auto p-4 bg-white border rounded-lg">
-      {!joined ? (
-        <div className="flex flex-col items-center">
-          <h1 className="text-2xl font-bold text-gray-900">Chat Room</h1>
-          <div className="w-64 px-4 py-2 mb-4 border-2 text-black placeholder-gray-800 rounded-l bold text-lg bg-gray-200">
-            Player: {userName}
-          </div>
+    <div>
+    {/* Button to open the chat modal positioned at the lower-right */}
+    <button
+      onClick={openModal}
+      className="fixed bottom-4 left-4 h-14 px-6 m-2 text-lg text-indigo-100 transition-colors duration-150 bg-indigo-700 rounded-lg focus:shadow-outline hover:bg-indigo-800"
+    >
+      Open Chat Room
+    </button>
+   {/* Modal  */}
+   {isModalOpen && (
+        <div className="fixed bottom-4 left-4 w-50 max-w-3xl mx-auto p-4 bg-white border rounded-lg">
+          <div className="bg-white p-6 rounded-lg w-80 sm:w-96 max-w-sm mx-auto">
+            <h3 className="text-2xl font-bold text-gray-900">Welcome {userName} !</h3>
 
-          {/* Available Rooms - Scrollable */}
-          <div className="mt-4 w-full max-h-[80px] overflow-y-auto"> 
-            <h2 className="text-lg font-bold text-black">Available Rooms:</h2>
-            <ul className="list-disc pl-4">
-              {rooms.map((availableRoom) => (
-                <li key={availableRoom} className="mt-2">
-                  <button
-                    onClick={() => handleSelectRoom(availableRoom)}
-                    className={`text-base ${
-                      room === availableRoom
-                        ? "bg-blue-500 text-white" // Highlight the selected room
-                        : "text-blue-500"
-                    } p-2 rounded-lg`}
-                  >
-                    {availableRoom}
-                  </button>
-                  <button
-                    className="text-red-500 ml-2"
-                    onClick={() => handleRemoveRoom(availableRoom)}
-                  >
-                    X
-                  </button>
-                </li>
-              ))}
-            </ul>
-          </div>
+            {!joined ? (
+              <div className="flex flex-col ">
+                <div className="w-64 px-4 py-2 mb-4 border-2 text-black placeholder-gray-800 rounded-l bold text-lg" >
+                 
+                </div>
 
-          {/* Create a Room */}
-          <div className="mt-4">
-            {/* <h2 className="text-xl">Create a new room:</h2> */}
-            <input
-              type="text"
-              placeholder="Enter new room name"
-              value={room}
-              onChange={(e) => setRoom(e.target.value)}
-              className="w-64 px-4 py-2 mb-4 border-2 text-black placeholder-gray-800 rounded-lg"
-            />
+                {/* Available Rooms */}
+                <div className="mt-4 w-full max-h-[80px] overflow-y-auto">
+                  <h2 className="text-lg font-bold text-black text-sm">Available Rooms listed:</h2>
+                  <ul className="list-disc pl-4">
+                    {rooms.map((availableRoom) => (
+                      <li key={availableRoom} className="mt-2">
+                        <button
+                          onClick={() => handleSelectRoom(availableRoom)}
+                          className={`text-base ${
+                            room === availableRoom
+                              ? "bg-blue-500 text-white"
+                              : "text-blue-500"
+                          } p-2 rounded-lg`}
+                        >
+                          {availableRoom}
+                        </button>
+                        <button
+                          className="text-red-500 ml-2"
+                          onClick={() => handleRemoveRoom(availableRoom)}
+                        >
+                          X
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                {/* Create Room */}
+                <div className="flex space-x-2">
+                <input
+                  type="text"
+                  placeholder="Enter new room name"
+                  value={room}
+                  onChange={(e) => setRoom(e.target.value)}
+                  className="w-42 px-4 py-2 mb-4 border-2 text-black text-xs placeholder-gray-800 rounded-lg"
+                />
+                <button
+                  className="w-32 px-4 py-2 text-white text-xs bg-green-500 rounded-lg"
+                  onClick={handleCreateRoom}
+                >
+                  Create Room
+                </button>
+              </div>
+                {/* Join Room */}
+                <button
+                  className="p-2 mt-4 text-white bg-blue-500 rounded-lg"
+                  onClick={handleJoinRoom}
+                  disabled={!room}
+                >
+                  Join Room
+                </button>
+              </div>
+            ) : (
+              <div className="w-full max-w-3xl mx-auto">
+                <h1 className="mb-4 text-md text-gray-900">You are in room: {room}</h1>
+                <div className="h-[200px] overflow-y-auto p-4 mb-4 bg-gray-200 border-2 text-black rounded-lg">
+                  <div>
+                    {messages.map((msg, index) => (
+                      <ChatMessage
+                        key={index}
+                        sender={msg.sender}
+                        message={msg.message}
+                        isOwnMessage={msg.sender === userName}
+                      />
+                    ))}
+                  </div>
+                  <ChatForm onSendMessage={handleSendMessage} />
+                </div>
+
+                <button
+                  className="mt-4 text-red-500"
+                  onClick={handleLeaveRoom}
+                >
+                  Exit Chat
+                </button>
+              </div>
+            )}
+
+            {/* Close Modal Button */}
             <button
-              className="p-2 mt-2 text-white bg-green-500 rounded-lg"
-              onClick={handleCreateRoom}
+              className="mt-4 bg-red-500 text-white p-2 rounded-lg"
+              onClick={closeModal}
             >
-              Create Room
+              Close
             </button>
           </div>
-
-          {/* Join the selected room */}
-          <button
-            className="p-2 mt-4 text-white bg-blue-500 rounded-lg"
-            onClick={handleJoinRoom}
-            disabled={!room}
-          >
-            Join Room
-          </button>
-        </div>
-      ) : (
-        <div className="w-full max-w-3xl mx-auto">
-          <h1 className="mb-4 text-2xl font-bold text-gray-900">Room: {room}</h1>
-          <div className="h-[200px] overflow-y-auto p-4 mb-4 bg-gray-200 border-2 text-black rounded-lg">
-            <div>
-              {messages.map((msg, index) => (
-                <ChatMessage
-                  key={index}
-                  sender={msg.sender}
-                  message={msg.message}
-                  isOwnMessage={msg.sender === userName}
-                />
-              ))}
-            </div>
-            <ChatForm onSendMessage={handleSendMessage} />
-          </div>
-
-          {/* Exit Room Button */}
-          <button
-            className="mt-4 text-red-500"
-            onClick={handleLeaveRoom}
-          >
-            Exit Chat
-          </button>
         </div>
       )}
     </div>
