@@ -108,7 +108,9 @@ const LoginPage: React.FC = () => {
                 </button>
                 <p className="text-gray-300 text-sm mt-4">
                   Don't have an account?{" "}
-                  <Link href="/signup" className="text-blue-500">Sign Up</Link>
+                  <Link href="/signup" className="text-blue-500">
+                    Sign Up
+                  </Link>
                 </p>
               </form>
             </>
@@ -127,7 +129,7 @@ const LoginPage: React.FC = () => {
               <AvatarCarousel onSelectAvatar={handleAvatarSelection} />
               {/* Show Start Game button only after avatar is selected */}
               {selectedAvatar && (
-                <Link href={"/gamepage"}>
+                <Link href={"/rules"}>
                   <button className="mt-4 bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700">
                     Start Game
                   </button>
