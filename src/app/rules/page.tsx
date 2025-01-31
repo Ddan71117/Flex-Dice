@@ -107,7 +107,7 @@ const Rules = () => {
             >
              
               <Image
-                src="/image/smCoins.png"
+                src="/images/smCoins.png"
                 alt="Avatar"
                 width={200}  
                 height={200} 
