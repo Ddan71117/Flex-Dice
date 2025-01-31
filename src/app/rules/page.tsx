@@ -1,6 +1,21 @@
-import Layout from "@/app/layout";
 
-const Page = () => {
+"use client";
+import Link from "next/link";
+import Layout from "@/app/layout";
+import Image from "next/image"; 
+import { useState, useEffect } from "react";
+
+const Rules = () => {
+  const [userName, setUserName] = useState("");
+
+   useEffect(() => {
+      // Retrieve the username from localStorage
+      const storedUserName = localStorage.getItem("userName");
+      if (storedUserName) {
+        setUserName(storedUserName);
+      }
+   }, []);
+
   return (
     <Layout>
       {" "}
@@ -17,21 +32,32 @@ const Page = () => {
               Choose a player to start. This player takes their turn by rolling
               the dice.
             </li>
+
             <li>If you have 3 or more chips, roll all 3 dice.</li>
             <li>If you have 2 chips, roll 2 dice.</li>
             <li>If you have 1 chip, roll 1 die.</li>
             <li>If you have no chips, don’t roll any dice.</li>
           </ul>
+          <p>After rolling the dice, the player takes action depending on the dice rolled.</p>
           <p>
             After rolling the dice, the player takes action depending on the
             dice rolled.
           </p>
+
           <ul className="list-disc pl-6 font-bold">
             <li>Rolling an L: Pass a chip to the player on your left.</li>
             <li>Rolling an R: Pass a chip to the player on your right.</li>
             <li>Rolling a C: Put a chip in the center pot.</li>
             <li>Rolling a D: Do nothing.</li>
           </ul>
+          <p>If you lose all your chips, you aren't out of the game but you don’t roll any dice until another player passes you a chip.</p>
+          
+          <br />
+
+          <p><strong>Winning the Game:</strong></p>
+          <br />
+          <p>The game ends when only one player has chips left. That player is the winner. And they get to take all the chips from the center pot!</p>
+
           <p>
             If you lose all your chips, you aren't out of the game but you don’t
             roll any dice until another player passes you a chip.
@@ -47,6 +73,7 @@ const Page = () => {
             The game ends when only one player has chips left. That player is
             the winner. And they get to take all the chips from the center pot!
           </p>
+
 
           <a
             href="https://www.youtube.com/watch?v=OxxpTWk3Rx0&t=21s"
@@ -72,9 +99,29 @@ const Page = () => {
             </svg>
           </a>
         </div>
+       
+        <div className="absolute top-1/2 right-40 transform -translate-y-1/2 flex justify-center items-center">
+          <Link href="/gamepage">
+            <div
+              className="w-60 h-60 flex items-center justify-center bg-gray-800 text-white rounded-full shadow-lg transform hover:scale-105 transition-all cursor-pointer"
+            >
+             
+              <Image
+                src="/image/smCoins.png"
+                alt="Avatar"
+                width={200}  
+                height={200} 
+                className="rounded-full"
+              />
+              <span className="absolute top-8 text-md font-bold text-center text-white">{userName} are you</span>
+              <span className="absolute bottom-8 text-md font-bold text-center text-white"> feeling Lucky?</span>
+            </div>
+          </Link>
+        </div>
+
       </div>
     </Layout>
   );
 };
 
-export default Page;
+export default Rules;
