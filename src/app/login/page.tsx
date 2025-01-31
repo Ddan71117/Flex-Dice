@@ -13,7 +13,7 @@ const LoginPage: React.FC = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [selectedAvatar, setSelectedAvatar] = useState<string | null>(null);
-  const [passwordVisible, setPasswordVisible] = useState(false); // State to toggle password visibility
+  const [passwordVisible, setPasswordVisible] = useState(false); 
 
   // Load login state from localStorage when the page is reloaded
   useEffect(() => {
@@ -121,15 +121,15 @@ const LoginPage: React.FC = () => {
                 You are successfully logged in!
               </p>
               <h3 className="text-xl text-white mb-4">
-                Select Your Avatar to begin the game
+                Select Your Avatar 
               </h3>
               {/* Avatar selection */}
               <AvatarCarousel onSelectAvatar={handleAvatarSelection} />
               {/* Show Start Game button only after avatar is selected */}
               {selectedAvatar && (
-                <Link href={"/gamepage"}>
+                <Link href={"/rules"}>
                   <button className="mt-4 bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700">
-                    Start Game
+                    View Rules
                   </button>
                 </Link>
               )}
