@@ -70,18 +70,18 @@ const Rules = () => {
           </a>
         </div>
 
-        {/* Avatar Icon Button to the Right of the Rules Card */}
+       
         <div className="absolute top-1/2 right-40 transform -translate-y-1/2 flex justify-center items-center">
           <Link href="/gamepage">
             <div
               className="w-60 h-60 flex items-center justify-center bg-gray-800 text-white rounded-full shadow-lg transform hover:scale-105 transition-all cursor-pointer"
             >
-              {/* Avatar Icon (Replace with your own avatar image if needed) */}
+             
               <Image
-                src="/image/smCoins.png" // Make sure to replace with the correct path
+                src="/image/smCoins.png"
                 alt="Avatar"
-                width={200}  // Size of the avatar
-                height={200} // Size of the avatar
+                width={200}  
+                height={200} 
                 className="rounded-full"
               />
               <span className="absolute top-8 text-md font-bold text-center text-white">{userName} are you</span>
