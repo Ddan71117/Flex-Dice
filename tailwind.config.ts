@@ -11,21 +11,23 @@ export default {
       colors: {
         background: "var(--background)",
         foreground: "var(--foreground)",
-      },
-      keyframes: {
-        pulseNotify: {
-          '0%': { transform: 'scale(1)' },          
-          '10%': { transform: 'scale(1.1)' },       
-          '20%': { transform: 'scale(1)' },         
-          '30%': { transform: 'scale(1.1)' },       
-          '40%': { transform: 'scale(1)' },         
-          '80%': { transform: 'scale(1)' },        
-          '100%': { transform: 'scale(1)' },        
-        },
+        'gray-700': '#2d3748',
+        'gray-600': '#4a5568',
+        'gray-900': '#1a202c',
       },
       animation: {
-        pulseNotify: 'pulseNotify 4s ease-in-out infinite', 
+        gradient: 'gradient 30s ease infinite',
       },
+      keyframes: {
+        gradient: {
+          '0%': { 'background-position': '0% 50%' },
+          '50%': { 'background-position': '100% 50%' },
+          '100%': { 'background-position': '0% 50%' },
+        },
+      },
+      backgroundImage: {
+        'gray-gradient': 'linear-gradient(-45deg, #2d3748, #2d3748, #4a5568, #1a202c)',
+      },  
     },
   },
   plugins: [],

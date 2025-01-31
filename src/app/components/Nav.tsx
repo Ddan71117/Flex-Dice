@@ -2,14 +2,20 @@
 
 import React from "react";
 import { useState, useEffect } from "react";
-import AvatarCarousel from "./AvatarCarousel";
 import { usePathname } from "next/navigation"; // Import usePathname from next/navigation
-import MainDropdown from "./MainDropdown";
 
 const Nav: React.FC = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false); // Track login state
   const [avatarSelected, setAvatarSelected] = useState(false); // Track avatar selection
+  const [isClient, setIsClient] = useState(false);
+
   const pathname = usePathname(); // Get current path
+
+  useEffect(() => {
+    setIsClient(true); // Trigger client-side logic
+    const loggedInUser = false; // Simulate logged-in state
+    setIsLoggedIn(loggedInUser);
+  }, []);
 
   // Simulate login for testing (you can replace this with your actual authentication logic)
   useEffect(() => {
@@ -30,8 +36,8 @@ const Nav: React.FC = () => {
   };
 
   return (
-    <nav className="fixed top-0 left-0 w-full mt-4 mb-4 bg-gray-800 p-4 h-19 text-white flex justify-between items-center z-30 ">
-      <div className="text-5xl font-semibold text-center ">Flex-Dice</div>
+    <nav className="fixed w-full bg-gray-gradient bg-[length:400%_400%] animate-gradient p-4 h-19 text-white flex justify-center items-center z-30">
+      <div className="text-5xl font-semibold">Flex-Dice</div>
     </nav>
   );
 };
