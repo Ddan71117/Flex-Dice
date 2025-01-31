@@ -108,7 +108,9 @@ const LoginPage: React.FC = () => {
                 </button>
                 <p className="text-gray-300 text-sm mt-4">
                   Don't have an account?{" "}
-                  <Link href="/signup" className="text-blue-500">Sign Up</Link>
+                  <Link href="/signup" className="text-blue-500">
+                    Sign Up
+                  </Link>
                 </p>
               </form>
             </>

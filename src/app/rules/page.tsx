@@ -1,9 +1,10 @@
 
 "use client";
 import Link from "next/link";
-import Layout from "../layout";
+import Layout from "@/app/layout";
 import Image from "next/image"; 
 import { useState, useEffect } from "react";
+
 const Rules = () => {
   const [userName, setUserName] = useState("");
 
@@ -14,23 +15,35 @@ const Rules = () => {
         setUserName(storedUserName);
       }
    }, []);
-  
+
   return (
     <Layout>
+      {" "}
       <div className="relative min-h-screen bg-cover bg-center flex items-center justify-center">
         <div className="max-w-sm p-6 bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700">
-          <h5 className="mb-2 text-2xl font-semibold tracking-tight text-gray-900 dark:text-white">
-            How to play:
-          </h5>
+          <a href="#">
+            <h5 className="mb-2 text-2xl font-semibold tracking-tight text-gray-900 dark:text-white">
+              How to play:
+            </h5>
+          </a>
           <p>Each player receives 3 chips.</p>
           <ul className="list-disc pl-6 font-bold">
-            <li>Choose a player to start. This player takes their turn by rolling the dice.</li>
+            <li>
+              Choose a player to start. This player takes their turn by rolling
+              the dice.
+            </li>
+
             <li>If you have 3 or more chips, roll all 3 dice.</li>
             <li>If you have 2 chips, roll 2 dice.</li>
             <li>If you have 1 chip, roll 1 die.</li>
             <li>If you have no chips, don’t roll any dice.</li>
           </ul>
           <p>After rolling the dice, the player takes action depending on the dice rolled.</p>
+          <p>
+            After rolling the dice, the player takes action depending on the
+            dice rolled.
+          </p>
+
           <ul className="list-disc pl-6 font-bold">
             <li>Rolling an L: Pass a chip to the player on your left.</li>
             <li>Rolling an R: Pass a chip to the player on your right.</li>
@@ -44,6 +57,23 @@ const Rules = () => {
           <p><strong>Winning the Game:</strong></p>
           <br />
           <p>The game ends when only one player has chips left. That player is the winner. And they get to take all the chips from the center pot!</p>
+
+          <p>
+            If you lose all your chips, you aren't out of the game but you don’t
+            roll any dice until another player passes you a chip.
+          </p>
+          <br />
+
+          <p>
+            <strong>Winning the Game:</strong>
+          </p>
+          <br />
+
+          <p>
+            The game ends when only one player has chips left. That player is
+            the winner. And they get to take all the chips from the center pot!
+          </p>
+
 
           <a
             href="https://www.youtube.com/watch?v=OxxpTWk3Rx0&t=21s"
@@ -69,7 +99,6 @@ const Rules = () => {
             </svg>
           </a>
         </div>
-
        
         <div className="absolute top-1/2 right-40 transform -translate-y-1/2 flex justify-center items-center">
           <Link href="/gamepage">
@@ -89,6 +118,7 @@ const Rules = () => {
             </div>
           </Link>
         </div>
+
       </div>
     </Layout>
   );
