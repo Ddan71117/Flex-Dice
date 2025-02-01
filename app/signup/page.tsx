@@ -1,23 +1,32 @@
 "use client";
 
 import React, { useState } from "react";
-import Layout from "@/app/layout";
+import Layout from "../layout";
+import { createUser } from "../lib/actions";
+import { useRouter } from "next/navigation";
 
 const SignUpPage: React.FC = () => {
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+  const router = useRouter();
 
-  const handleSignUp = (e: React.FormEvent) => {
+  const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
-    //  add logic for user registration
-    if (email === "" || password === "") {
-      setErrorMessage("Please fill in all fields.");
-    } else {
-      setErrorMessage("");
-      // add  signup logic
+    const formData = new FormData();
+    formData.append("username", username);
+    formData.append("password", password);
+
+    try {
+      console.log(formData)
+      await createUser(undefined, formData);
+      setErrorMessage("")
+      router.push("/login");
+    } catch (error) {
+      setErrorMessage("Failed to create user")
+      console.log(error)
     }
-  };
+  }    
 
   return (
     <Layout>
@@ -32,16 +41,16 @@ const SignUpPage: React.FC = () => {
 
           <form onSubmit={handleSignUp}>
             <div className="mb-4">
-              <label htmlFor="email" className="block text-gray-300">
-                Email
+              <label htmlFor="username" className="block text-gray-300">
+                Username
               </label>
               <input
-                type="email"
-                id="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                type="text"
+                id="username"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
                 className="mt-2 w-full px-3 py-2 border border-gray-500 rounded-md bg-gray-700 text-white focus:ring-blue-500 focus:border-blue-500"
-                placeholder="Enter email"
+                placeholder="Enter username"
               />
             </div>
 
