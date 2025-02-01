@@ -19,14 +19,15 @@ const GamePage: React.FC = () => {
   }, []);
 
   return (
-    <div className="relative min-h-screen bg-transparent">
+    // <div className="relative min-h-screen bg-transparent">
       <Layout>
         <MainDropdown />
-        <PokerTable /> {/* Render PokerTable here */}
-      </Layout>
+        {/* <PokerTable /> Render PokerTable here */}
+       
       <ChatBox />
       <Stats />
-    </div>
+      </Layout>
+  //   </div>
   );
 };
 
