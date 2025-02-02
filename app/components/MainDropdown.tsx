@@ -1,8 +1,7 @@
 "use client";
-import { useState, useEffect } from 'react';
-import Link from "next/link";
-import AvatarCarousel from './AvatarCarousel'; 
-
+import { useState, useEffect } from "react";
+import AvatarCarousel from "./AvatarCarousel";
+import { signOut } from "next-auth/react";
 
 const MainDropdown: React.FC = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -11,50 +10,48 @@ const MainDropdown: React.FC = () => {
   const [username, setUsername] = useState<string | null>(null);
   const [userEmail, setUserEmail] = useState<string | null>(null);
 
-useEffect(() => {
- const storedUserEmail = localStorage.getItem('userEmail');
- if (storedUserEmail) {
-   setUserEmail(storedUserEmail);
- }
-}, []); 
+  useEffect(() => {
+    const storedUserEmail = localStorage.getItem("userEmail");
+    if (storedUserEmail) {
+      setUserEmail(storedUserEmail);
+    }
+  }, []);
 
- // get usernamefrom local storage
- useEffect(() => {
-  // Retrieve avatar from localStorage on page load
-  const storedUsername = localStorage.getItem('username');
-  if (storedUsername) {
-    setUsername(username);
-  }
-}, []);
-
+  // get username from local storage
+  useEffect(() => {
+    const storedUsername = localStorage.getItem("username");
+    if (storedUsername) {
+      setUsername(storedUsername); // Fix: set the correct username
+    }
+  }, []);
 
   // Check if user is logged in on initial load (from localStorage)
   useEffect(() => {
-    const storedIsLoggedIn = localStorage.getItem('isLoggedIn');
-    const storedAvatar = localStorage.getItem('selectedAvatar');
+    const storedIsLoggedIn = localStorage.getItem("isLoggedIn");
+    const storedAvatar = localStorage.getItem("selectedAvatar");
 
     // If the user is logged in, set the corresponding states
-    if (storedIsLoggedIn === 'true') {
-      setIsLoggedIn(true);  // Update logged-in state
+    if (storedIsLoggedIn === "true") {
+      setIsLoggedIn(true); // Update logged-in state
     }
 
     if (storedAvatar) {
-      setSelectedAvatar(storedAvatar);  // Update selected avatar
+      setSelectedAvatar(storedAvatar); // Update selected avatar
     }
   }, []); // This runs only once on initial load
 
   // Handle logout
-  const handleLogout = () => {
-    localStorage.removeItem('isLoggedIn');
-    localStorage.removeItem('selectedAvatar');
-    localStorage.removeItem('username');
-    localStorage.removeItem('userEmail');
+  const handleLogout = async () => {
+    localStorage.removeItem("isLoggedIn");
+    localStorage.removeItem("selectedAvatar");
+    localStorage.removeItem("username");
+    localStorage.removeItem("userEmail");
     setIsLoggedIn(false);
     setSelectedAvatar(null);
     setUsername(null);
     setUserEmail(null);
+    await signOut({ callbackUrl: "/" });
   };
-
 
   // Toggle the dropdown visibility
   const toggleDropdown = () => {
@@ -63,15 +60,15 @@ useEffect(() => {
 
   // Close the dropdown when clicking outside
   const handleClickOutside = (e: any) => {
-    if (!e.target.closest('.dropdown') && !e.target.closest('.avatar-btn')) {
+    if (!e.target.closest(".dropdown") && !e.target.closest(".avatar-btn")) {
       setIsDropdownOpen(false);
     }
   };
 
   useEffect(() => {
-    document.addEventListener('click', handleClickOutside);
+    document.addEventListener("click", handleClickOutside);
     return () => {
-      document.removeEventListener('click', handleClickOutside);
+      document.removeEventListener("click", handleClickOutside);
     };
   }, []);
 
@@ -95,47 +92,30 @@ useEffect(() => {
           />
         ) : (
           /* Show DiceCluster only if logged out */
-          !isLoggedIn
+          !isLoggedIn && <div className="w-32 h-32 rounded-full bg-gray-500" />
         )}
       </button>
 
-      {isDropdownOpen && (
+      {isDropdownOpen && isLoggedIn && (
         <div className="dropdown absolute left-10 top-16 z-50 mt-2 w-48 bg-white divide-y divide-gray-100 rounded-lg shadow-sm dark:bg-gray-700 dark:divide-gray-600">
-          {isLoggedIn ? (
-            <div className="px-4 py-3">
-              <span className="block text-sm text-gray-900 dark:text-white">{localStorage.getItem("userName") || 'UserNameHere'}</span>
-              <span className="block text-sm text-gray-500 truncate dark:text-gray-400">{localStorage.getItem("userEmail") || 'test@gmail.com'}</span>
-            </div>
-          ) : (
+          <div className="px-4 py-3">
+            <span className="block text-sm text-gray-900 dark:text-white">
+              {username || "UserNameHere"}
+            </span>
+            <span className="block text-sm text-gray-500 truncate dark:text-gray-400">
+              {userEmail || "test@gmail.com"}
+            </span>
             <ul className="py-2">
               <li>
-                <Link href="/" className="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-500 dark:text-gray-200 dark:hover:bg-blue-600">
-                  Login
-                </Link>
-              </li>
-              <li>
-                <Link href="/signup" className="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-500 dark:text-gray-200 dark:hover:bg-green-600">
-                  Signup
-                </Link>
+                <button
+                  onClick={handleLogout} // Handle logout
+                  className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white"
+                >
+                  Sign out
+                </button>
               </li>
             </ul>
-          )}
-
-          {/* Show logout only when logged in */}
-          {isLoggedIn && (
-            <ul className="py-2">
-              <li>
-              <Link href="/" passHref>
-          <button
-            onClick={handleLogout} // Handle logout
-            className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white"
-          >
-            Sign out
-          </button>
-        </Link>
-              </li>
-            </ul>
-          )}
+          </div>
         </div>
       )}
 

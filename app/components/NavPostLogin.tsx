@@ -3,6 +3,7 @@
 import React from "react";
 import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation"; // Import usePathname from next/navigation
+import Link from "next/link"; // Import Link from next/link
 import RulesRef from "./Rulesref";
 
 const Nav: React.FC = () => {
@@ -22,6 +23,7 @@ const Nav: React.FC = () => {
   const isLoginPage = pathname === "/login"; // Check if it's the login page
   const isSignupPage = pathname === "/signup"; // Check if it's the signup page
   const isGamePage = pathname === "/gamepage"; // Check if it's the game page
+  const isRules = pathname === "/rules"; // Check if it's the rules page
 
   // Handle avatar selection (this could be done by setting the avatar after signup)
   const handleAvatarSelection = (avatar: string) => {
@@ -55,6 +57,16 @@ const Nav: React.FC = () => {
               {showRules && <RulesRef />}
             </div>
           </div>
+        )}
+        {isRules && ( // Only show the button on the rules page
+          <Link href="/gamepage">
+            <button
+              type="button"
+              className="bg-teal-500 text-white py-2 px-4 rounded-md hover:bg-teal-600"
+            >
+              Start Game
+            </button>
+          </Link>
         )}
       </div>
     </nav>

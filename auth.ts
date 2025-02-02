@@ -1,10 +1,10 @@
-
 import NextAuth from 'next-auth';
 import { authConfig } from './auth.config';
 import Credentials from 'next-auth/providers/credentials';
 import { sql } from '@vercel/postgres';
 import type { User } from './app/lib/definitions';
 import bcrypt from 'bcryptjs';
+import type { AdapterUser } from 'next-auth/adapters';
 import { z } from 'zod';
 
 async function getUser(username: string): Promise<User | undefined> {
@@ -44,5 +44,18 @@ providers: [Credentials({
           }
       })
   ],
+
+  callbacks: {
+    async session({ session, token }) {
+      session.user = token.user as AdapterUser & User;
+      return session;
+    },
+    async jwt({ token, user }) {
+      if (user) {
+        token.user = user;
+      }
+      return token;
+    }
+  }
 
 });

@@ -5,7 +5,7 @@ export const authConfig = {
     signIn: '/login',
   },
   callbacks: {
-    authorized({ auth, request: { nextUrl } }) {
+    async authorized({ auth, request: { nextUrl } }) {
       const isLoggedIn = !!auth?.user;
       console.log('auth:', auth)
       console.log('nexturl:', nextUrl)
@@ -14,10 +14,15 @@ export const authConfig = {
         if (isLoggedIn) return true;
         console.log(isLoggedIn)
         return false; // Redirect unauthenticated users to login page
-      } else if (isLoggedIn) {
-        return Response.redirect(new URL('/gamepage', nextUrl));
+      } else if (isLoggedIn && nextUrl.pathname !== '/rules') {
+        return Response.redirect(new URL('/rules', nextUrl));
       }
       return true;
+    },
+    async redirect({ url, baseUrl }) {
+      if (url.startsWith(baseUrl)) return url;
+      // Redirect to rules page after login
+      return baseUrl + '/rules';
     },
   },
   providers: [], // Add providers with an empty array for now
