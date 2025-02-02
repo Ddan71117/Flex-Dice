@@ -43,12 +43,27 @@ const PokerTable: React.FC = () => {
   // Function to handle the roll and update the dice result in the center
   const handleNextTurn = () => {
     handleTurn(); // Call the game logic function for next turn
-
-    // Store the dice results for the current turn in separate dice slots
-    const currentDiceResults = players[currentPlayerIndex].diceResult.split(", ");
     
-    // Ensure that diceResults has exactly 3 values before updating the state
-    setDiceResults(currentDiceResults.length === 3 ? currentDiceResults : ['.', '.', '.']);
+    // Safely handle the case where diceResult is null or undefined
+    let currentDiceResults: string[] = [];
+    
+    const diceResult = players[currentPlayerIndex].diceResult;
+  
+    if (diceResult) {
+      // If diceResult is available, split it into an array
+      currentDiceResults = diceResult.split(", ");
+    } else {
+      // If diceResult is null or undefined, provide default results
+      currentDiceResults = ['.', '.', '.'];
+    }
+  
+    // Ensure the diceResults array has exactly 3 results
+    if (currentDiceResults.length !== 3) {
+      currentDiceResults = ['.', '.', '.'];  // Default to 3 dots if the length is incorrect
+    }
+  
+    // Set the dice results
+    setDiceResults(currentDiceResults);
   };
 
   return (
@@ -81,7 +96,7 @@ const PokerTable: React.FC = () => {
           >
             {/* Player Avatars */}
             <img
-              src={player.id === 0 ? currentUserAvatar || '' : getRandomAvatar(player.id)}
+              src={player.id === 0 ? currentUserAvatar : getRandomAvatar(player.id)}
               alt={`Player ${player.id}`}
               className="w-12 h-12 rounded-full"
             />
