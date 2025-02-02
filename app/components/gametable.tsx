@@ -1,15 +1,15 @@
 'use client';
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Game from './gameLogic'; // Adjust the path as necessary
 
 const PokerTable: React.FC = () => {
-  const { players, gameLog, handleTurn, winner } = Game(); // Use Game as a hook
+  const { players, gameLog, handleTurn, winner, currentPlayerIndex } = Game();
   const [currentUserAvatar, setCurrentUserAvatar] = useState<string | undefined>();
-  const [ randomNumber, setRandomNumber ]  = useState<number>(0)
+  const [randomNumber, setRandomNumber] = useState<number>(0);
+  const [diceResults, setDiceResults] = useState<string[]>(['.', '.', '.']); // Default dice results (3 dice)
 
   useEffect(() => {
-    // Retrieve the current user's avatar from local storage
-    const storedAvatar = localStorage.getItem('selectedAvatar');
+    const storedAvatar = localStorage.getItem("selectedAvatar");
     if (storedAvatar) {
       setCurrentUserAvatar(storedAvatar);
     }
@@ -21,33 +21,111 @@ const PokerTable: React.FC = () => {
 
   // Function to get a random avatar for other players
   const getRandomAvatar = (playerId: number): string => {
-    const randomAvatarNumber = randomNumber; // Assuming you have 5 random avatars
-    return `/images/avatar${randomAvatarNumber}.png`; // Adjust the naming convention as necessary
+    return `/images/avatar${randomNumber}.png`; // Adjust the naming convention as necessary
+  };
+
+  // Function to get the dice image based on the roll result
+  const getDiceImage = (result: string): string | undefined => {
+    switch (result) {
+      case "L":
+        return "/images/dice3.png";  // Ensure these images exist in your public folder
+      case "R":
+        return "/images/dice4.png";
+      case "C":
+        return "/images/dice2.png";
+      case ".":
+        return "/images/dice1.png";
+      default:
+        return "/images/dice1.png";  // Default to empty dice if no result
+    }
+  };
+
+  // Function to handle the roll and update the dice result in the center
+  const handleNextTurn = () => {
+    handleTurn(); // Call the game logic function for next turn
+
+    // Store the dice results for the current turn in separate dice slots
+    const currentDiceResults = players[currentPlayerIndex].diceResult.split(", ");
+    
+    // Ensure that diceResults has exactly 3 values before updating the state
+    setDiceResults(currentDiceResults.length === 3 ? currentDiceResults : ['.', '.', '.']);
   };
 
   return (
-    <div style={{ position: 'relative', textAlign: 'center' }}>
-      <img src="/images/poker_table.png" alt="Poker Table" style={{ width: '100%', height: 'auto' }} />
-      {players.map((player) => (
-        <div key={player.id} style={{ position: 'absolute', /* Positioning logic */ }}>
-          <img 
-            src={player.id === 0 ? currentUserAvatar : getRandomAvatar(player.id)} 
-            alt={`Player ${player.id}`} 
-          />
-          <p>{player.id === 0 ? 'You' : `Player ${player.id}`}: {player.chips} chips</p>
-        </div>
-      ))}
-      {winner ? (
-        <h2>🎉 Player {winner} wins the game! 🎉</h2>
-      ) : (
-        <button onClick={handleTurn}>Next Turn</button>
-      )}
-      <h3>Game Log:</h3>
-      <ul>
-        {gameLog.map((log, index) => (
-          <li key={index}>{log}</li>
+    <div className="flex justify-center items-center min-h-screen bg-gray-100">
+      <div className="relative flex justify-center items-center">
+        {/* Poker Table Image */}
+        <img
+          src="/images/poker_table.png"
+          alt="Poker Table"
+          className="w-full max-w-4xl"
+        />
+
+        {/* Player Positions */}
+        {players.map((player, index) => (
+          <div
+            key={player.id}
+            className={`absolute ${
+              index === 0
+                ? "top-0 left-1/2 transform -translate-x-1/2"
+                : index === 1
+                ? "top-1/2 left-0 transform -translate-y-1/2"
+                : index === 2
+                ? "top-1/2 right-0 transform -translate-y-1/2"
+                : index === 3
+                ? "bottom-0 left-1/4"
+                : index === 4
+                ? "bottom-0 right-1/4"
+                : ""
+            }`}
+          >
+            {/* Player Avatars */}
+            <img
+              src={player.id === 0 ? currentUserAvatar || '' : getRandomAvatar(player.id)}
+              alt={`Player ${player.id}`}
+              className="w-12 h-12 rounded-full"
+            />
+            <p className="text-white">{player.id === 0 ? "You" : `Player ${player.id}`}: {player.chips} chips</p>
+          </div>
         ))}
-      </ul>
+
+        {/* Center Player (Center Pot) */}
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+          <img
+            src="https://example.com/center-pot-image.png" // Replace with the actual URL for the center pot image
+            alt="Center Pot"
+            className="w-24 h-24 rounded-full"
+          />
+        </div>
+
+        {/* Dice Results in the Center (Always Show 3 Dice) */}
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 flex space-x-4">
+          {diceResults.map((result, index) => (
+            <img
+              key={index}
+              src={getDiceImage(result)}
+              alt={`Dice ${index + 1}`}
+              className="w-12 h-12"
+            />
+          ))}
+        </div>
+
+        {/* Game Log and Roll Button */}
+        {winner ? (
+          <h2 className="text-white absolute bottom-4 left-1/2 transform -translate-x-1/2 text-xl">
+            🎉 Player {winner} wins the game! 🎉
+          </h2>
+        ) : (
+          <>
+            <button
+              onClick={handleNextTurn}  // Updated to call handleNextTurn
+              className="absolute bottom-8 left-1/2 transform -translate-x-1/2 px-6 py-3 bg-blue-500 text-white rounded-md"
+            >
+              Next Turn
+            </button>
+          </>
+        )}
+      </div>
     </div>
   );
 };
