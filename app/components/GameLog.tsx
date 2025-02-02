@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 
-export default function Stats() {
+export default function GameLog() {
   const [winnings, setWinnings] = useState(0);
   const [losses, setLosses] = useState(0);
   const [gamesPlayed, setGamesPlayed] = useState(0);
@@ -19,7 +19,6 @@ export default function Stats() {
     if (storedUserName) {
       setUserName(storedUserName);
     }
-
   }, []);
 
   const openModal = () => {
@@ -38,12 +37,13 @@ export default function Stats() {
         View Your Stats
       </button>
 
-
       {isModalOpen && (
         <div className="fixed bottom-4 right-4 bg-white p-6 rounded-lg w-80 sm:w-96 max-w-sm mx-auto shadow-lg z-50">
           {/* Adjusting padding to remove excessive margins */}
           <div className="bg-white p-4 rounded-lg w-full max-w-xs sm:max-w-sm mx-auto text-left">
-            <h3 className="text-2xl font-bold text-gray-900 text-center mb-4">{userName} Stats</h3>
+            <h3 className="text-2xl font-bold text-gray-900 text-center mb-4">
+              {userName} Stats
+            </h3>
 
             <div className="flex justify-between text-black text-md mb-2">
               <span>Winnings:</span>
