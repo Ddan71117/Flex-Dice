@@ -7,27 +7,20 @@ import ChatMessage from "./ChatMessage";
 import "../globals.css";
 
 export default function ChatBox() {
-  const [room, setRoom] = useState("");
-  const [rooms, setRooms] = useState<string[]>([]);  // Store available rooms
-  const [joined, setJoined] = useState(false);
-  const [messages, setMessages] = useState<{ sender: string; message: string }[]>([]);
-  const [userName, setUserName] = useState("");
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [room, setRoom] = useState(""); // Selected room
+  const [rooms, setRooms] = useState<string[]>([]); // Available rooms
+  const [userName, setUserName] = useState("User"); // User name
+  const [joined, setJoined] = useState(false); // Whether the user has joined a room
+  const [messages, setMessages] = useState<{ sender: string; message: string }[]>([]); // Chat messages
+  const [isModalOpen, setIsModalOpen] = useState(false); // Modal visibility
 
   // Fetch available rooms when the component mounts
   useEffect(() => {
-    // Retrieve the username from localStorage
-    const storedUserName = localStorage.getItem("userName");
-    if (storedUserName) {
-      setUserName(storedUserName);
-    }
-
-    // Get available rooms from the server when the component is mounted
-    socket.emit("get-available-rooms");
+    socket.emit("get-available-rooms"); // Emit the event to fetch available rooms
 
     // Listen for updates to the available rooms
     socket.on("availableRooms", (rooms: string[]) => {
-      setRooms(rooms);
+      setRooms(rooms); // Set the available rooms list
     });
 
     socket.on("message", (data) => {
@@ -38,6 +31,7 @@ export default function ChatBox() {
       setMessages((prev) => [...prev, { sender: "system", message }]);
     });
 
+    // Cleanup listeners on unmount
     return () => {
       socket.off("availableRooms");
       socket.off("message");
@@ -45,77 +39,82 @@ export default function ChatBox() {
     };
   }, []);
 
+  // Join room logic
   const handleJoinRoom = () => {
     if (room && userName) {
-      socket.emit("join-room", { room, username: userName });
-      setJoined(true);
+      // Emit the join-room event with room and userName
+      socket.emit("join-room", { room, userName });
+      setJoined(true); // Update the UI to reflect that the user has joined
     }
   };
 
+  // Send message logic
   const handleSendMessage = (message: string) => {
     const data = { room, message, sender: userName };
     setMessages((prev) => [...prev, { sender: userName, message }]);
     socket.emit("message", data);
   };
 
+  // Select a room from the list
   const handleSelectRoom = (selectedRoom: string) => {
     setRoom(selectedRoom);
   };
 
+  // Create a new room
   const handleCreateRoom = () => {
     if (room) {
-      socket.emit("createRoom", room);  // Emit the new room to the server
-      setRoom("");  // Clear the input field
+      socket.emit("createRoom", room); // Emit the new room to the server
+      setRoom(""); // Clear the input field
     }
   };
 
+  // Remove a room
   const handleRemoveRoom = (roomToRemove: string) => {
     socket.emit("removeRoom", roomToRemove); // Emit room removal to the server
+    setRooms((prevRooms) => prevRooms.filter((r) => r !== roomToRemove)); // Update the rooms list after removing
   };
 
+  // Handle leaving the room
   const handleLeaveRoom = () => {
     socket.emit("leave-room", room); // Handle leaving a room
     setRoom("");
     setJoined(false);
   };
 
+  // Open the chat modal
   const openModal = () => {
-    setIsModalOpen(true); // Open modal
+    setIsModalOpen(true);
   };
 
+  // Close the chat modal
   const closeModal = () => {
-    setIsModalOpen(false); // Close modal
+    setIsModalOpen(false);
   };
-
 
   return (
     <div>
-    {/* Button to open the chat modal positioned at the lower-right */}
-    <button
-      onClick={openModal}
-      className="fixed bottom-4 left-4 h-14 px-6 m-2 text-lg text-indigo-100 transition-colors duration-150 bg-indigo-700 rounded-lg focus:shadow-outline hover:bg-indigo-800"
-    >
-      Open Chat Room
-    </button>
-   {/* Modal  */}
-   {isModalOpen && (
+      {/* Button to open the chat modal positioned at the lower-right */}
+      <button
+        onClick={openModal}
+        className="fixed bottom-4 left-4 h-14 px-6 m-2 text-lg text-indigo-100 transition-colors duration-150 bg-indigo-700 rounded-lg focus:shadow-outline hover:bg-indigo-800"
+      >
+        Open Chat Room
+      </button>
+
+      {/* Modal */}
+      {isModalOpen && (
         <div className="fixed bottom-4 left-4 w-50 max-w-3xl mx-auto p-4 bg-gray-800 border rounded-lg">
-          <div className=" bg-gray-800 p-6 rounded-lg w-80 sm:w-96 max-w-sm mx-auto">
+          <div className="bg-gray-800 p-6 rounded-lg w-80 sm:w-96 max-w-sm mx-auto">
             <h3 className="text-2xl font-bold text-white">Welcome {userName}!</h3>
-
-        
-
             {!joined ? (
-              <div className="flex flex-col ">
-                <div className="w-64 px-4 py-2 mb-4  text-black rounded-l bold text-lg" >
-                 
-                </div>
-
+              <div className="flex flex-col">
                 {/* Available Rooms */}
                 <div className="mt-2 w-full max-h-[80px] overflow-y-auto">
-                  <h2 className="mt-2 text-lg font-bold text-white text-sm">Available Rooms listed:</h2>
+                  <h2 className="mt-2 text-lg font-bold text-white text-sm">
+                    Available Rooms listed:
+                  </h2>
                   <br />
-                  <ul className="list-disc pl-4">
+                  <ul className="list-disc pl-4 mt-2">
                     {rooms.map((availableRoom) => (
                       <li key={availableRoom} className="mt-2">
                         <button
@@ -140,21 +139,22 @@ export default function ChatBox() {
                 </div>
 
                 {/* Create Room */}
-                <div className="flex space-x-2">
-                <input
-                  type="text"
-                  placeholder="Enter new room name"
-                  value={room}
-                  onChange={(e) => setRoom(e.target.value)}
-                  className="w-42 h-10 px-4 py-2 mb-4 border-2 text-black text-xs placeholder-gray-800 rounded-lg"
-                />
-                <button
-                  className="w-32 h-11 px-4 py-2 text-white text-xs bg-green-500 rounded-lg"
-                  onClick={handleCreateRoom}
-                >
-                  Create Room
-                </button>
-              </div>
+                <div className="flex space-x-2 mt-4">
+                  <input
+                    type="text"
+                    placeholder="Enter new room name"
+                    value={room}
+                    onChange={(e) => setRoom(e.target.value)}
+                    className="w-42 h-10 px-4 py-2 mb-4 border-2 text-black text-xs placeholder-gray-800 rounded-lg"
+                  />
+                  <button
+                    className="w-32 h-11 px-4 py-2 text-white text-xs bg-green-500 rounded-lg"
+                    onClick={handleCreateRoom}
+                  >
+                    Create Room
+                  </button>
+                </div>
+
                 {/* Join Room */}
                 <button
                   className="p-2 mt-4 text-white bg-blue-500 rounded-lg"
