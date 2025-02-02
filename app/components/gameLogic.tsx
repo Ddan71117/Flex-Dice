@@ -5,15 +5,17 @@ import '../globals.css';
 type Player = {
   id: number;
   chips: number;
+  diceResult: string | null; // Add diceResult to each player
 }
 
 export default function Game() {
   const [players, setPlayers] = useState<Player[]>([
-    { id: 1, chips: 3 },
-    { id: 2, chips: 3 },
-    { id: 3, chips: 3 },
-    { id: 4, chips: 3 },
-    { id: 0, chips: 0 }
+    { id: 1, chips: 3, diceResult: null }, // You
+    { id: 2, chips: 3, diceResult: null },
+    { id: 3, chips: 3, diceResult: null },
+    { id: 4, chips: 3, diceResult: null },
+    { id: 5, chips: 3, diceResult: null }, // Player 5
+    { id: 0, chips: 0, diceResult: null }  // Center Pot
   ]);
   const [currentPlayerIndex, setCurrentPlayerIndex] = useState(0);
   const [gameLog, setGameLog] = useState<string[]>([]);
@@ -47,6 +49,9 @@ export default function Game() {
     for (let i = 0; i < player.chips && i < 3; i++) {
       rolls.push(rollDice());
     }
+
+    // Store the dice result in the player's state
+    newPlayers[currentPlayerIndex].diceResult = rolls.join(', ');
 
     rolls.forEach((roll) => {
       if (roll === 'L') {
@@ -88,6 +93,5 @@ export default function Game() {
     });
   };
 
-  // Return the game state as an object
-  return { players, gameLog, handleTurn, winner };
+  return { players, gameLog, handleTurn, winner, currentPlayerIndex };
 }

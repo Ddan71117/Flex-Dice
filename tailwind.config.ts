@@ -12,19 +12,24 @@ export default {
         background: "var(--background)",
         foreground: "var(--foreground)",
       },
+      animation: {
+        gradient: 'gradient 25s ease infinite',
+      },
       keyframes: {
-        pulseNotify: {
-          '0%': { transform: 'scale(1)' },          
-          '10%': { transform: 'scale(1.1)' },       
-          '20%': { transform: 'scale(1)' },         
-          '30%': { transform: 'scale(1.1)' },       
-          '40%': { transform: 'scale(1)' },         
-          '80%': { transform: 'scale(1)' },        
-          '100%': { transform: 'scale(1)' },        
+        gradient: {
+          '0%': {
+            backgroundPosition: '0% 50%',
+          },
+          '50%': {
+            backgroundPosition: '100% 50%',
+          },
+          '100%': {
+            backgroundPosition: '0% 50%',
+          },
         },
       },
-      animation: {
-        pulseNotify: 'pulseNotify 4s ease-in-out infinite', 
+      backgroundImage: {
+        'gray-gradient': 'linear-gradient(-45deg, #2d3748, #2d3748, #4a5568, #1a202c)',
       },
     },
   },
