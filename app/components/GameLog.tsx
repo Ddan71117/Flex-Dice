@@ -38,22 +38,22 @@ export default function GameLog() {
       </button>
 
       {isModalOpen && (
-        <div className="fixed bottom-4 right-4 bg-white p-6 rounded-lg w-80 sm:w-96 max-w-sm mx-auto shadow-lg z-50">
+        <div className="fixed bottom-4 right-4 bg-gray-800 p-6 rounded-lg w-80 sm:w-96 max-w-sm mx-auto shadow-lg z-50">
           {/* Adjusting padding to remove excessive margins */}
-          <div className="bg-white p-4 rounded-lg w-full max-w-xs sm:max-w-sm mx-auto text-left">
-            <h3 className="text-2xl font-bold text-gray-900 text-center mb-4">
+          <div className="bg-gray-800 p-4 rounded-lg w-full max-w-xs sm:max-w-sm mx-auto text-left">
+            <h3 className="text-2xl font-bold text-white text-center mb-4">
               {userName} Stats
             </h3>
 
-            <div className="flex justify-between text-black text-md mb-2">
+            <div className="flex justify-between text-white text-md mb-2">
               <span>Winnings:</span>
               <span>{winnings}</span>
             </div>
-            <div className="flex justify-between text-black text-md mb-2">
+            <div className="flex justify-between text-white text-md mb-2">
               <span>Losses:</span>
               <span>{losses}</span>
             </div>
-            <div className="flex justify-between text-black text-md mb-2">
+            <div className="flex justify-between text-white text-md mb-2">
               <span>Games Played:</span>
               <span>{gamesPlayed}</span>
             </div>
