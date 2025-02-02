@@ -7,20 +7,44 @@ import ChatMessage from "./ChatMessage";
 import "../globals.css";
 
 export default function ChatBox() {
-  const [room, setRoom] = useState(""); // Selected room
-  const [rooms, setRooms] = useState<string[]>([]); // Available rooms
-  const [userName, setUserName] = useState("User"); // User name
-  const [joined, setJoined] = useState(false); // Whether the user has joined a room
-  const [messages, setMessages] = useState<{ sender: string; message: string }[]>([]); // Chat messages
-  const [isModalOpen, setIsModalOpen] = useState(false); // Modal visibility
+  const [room, setRoom] = useState(""); 
+  const [rooms, setRooms] = useState<string[]>([]); 
+  const [userName, setUserName] = useState("User"); 
+  const [joined, setJoined] = useState(false); 
+  const [messages, setMessages] = useState<{ sender: string; message: string }[]>([]); 
+  const [isModalOpen, setIsModalOpen] = useState(false); 
+
+  //for getting uses from auth but not sure api/route
+  // const fetchUser = async () => {
+  //   try {
+  //     const response = await fetch("/api/user", {
+  //       method: "GET",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //         // Add your authentication token or session cookie here if necessary
+  //       },
+  //     });
+
+  //     if (response.ok) {
+  //       const data = await response.json();
+  //       setUserName(data.userName); // Assuming the API returns { userName: "username" }
+  //     } else {
+  //       console.error("Failed to fetch user data");
+  //     }
+  //   } catch (error) {
+  //     console.error("Error fetching user data:", error);
+  //   }
+  // };
+
+  // fetchUser();  // Fetch user data when component mounts
 
   // Fetch available rooms when the component mounts
   useEffect(() => {
-    socket.emit("get-available-rooms"); // Emit the event to fetch available rooms
+    socket.emit("get-available-rooms"); 
 
     // Listen for updates to the available rooms
     socket.on("availableRooms", (rooms: string[]) => {
-      setRooms(rooms); // Set the available rooms list
+      setRooms(rooms); 
     });
 
     socket.on("message", (data) => {
@@ -42,9 +66,8 @@ export default function ChatBox() {
   // Join room logic
   const handleJoinRoom = () => {
     if (room && userName) {
-      // Emit the join-room event with room and userName
       socket.emit("join-room", { room, userName });
-      setJoined(true); // Update the UI to reflect that the user has joined
+      setJoined(true); 
     }
   };
 
@@ -91,6 +114,11 @@ export default function ChatBox() {
     setIsModalOpen(false);
   };
 
+    // Handle userName input and set it
+    const handleUserNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      setUserName(e.target.value);
+    };
+
   return (
     <div>
       {/* Button to open the chat modal positioned at the lower-right */}
@@ -105,16 +133,31 @@ export default function ChatBox() {
       {isModalOpen && (
         <div className="fixed bottom-4 left-4 w-50 max-w-3xl mx-auto p-4 bg-gray-800 border rounded-lg">
           <div className="bg-gray-800 p-6 rounded-lg w-80 sm:w-96 max-w-sm mx-auto">
-            <h3 className="text-2xl font-bold text-white">Welcome {userName}!</h3>
+            <h3 className="text-2xl font-bold text-white">Welcome {userName || "Guest"}!</h3>
+            
+            {/* If not joined, show room list and userName input */}
             {!joined ? (
               <div className="flex flex-col">
+                {/* User Name Input */}
+                {!userName && (
+                  <div className="mb-4">
+                    <input
+                      type="text"
+                      placeholder="Enter your name"
+                      value={userName}
+                      onChange={handleUserNameChange}
+                      className="w-full px-4 py-2 mb-4 border-2 text-black text-xs placeholder-gray-800 rounded-lg"
+                    />
+                  </div>
+                )}
+
                 {/* Available Rooms */}
                 <div className="mt-2 w-full max-h-[80px] overflow-y-auto">
                   <h2 className="mt-2 text-lg font-bold text-white text-sm">
                     Available Rooms listed:
                   </h2>
                   <br />
-                  <ul className="list-disc pl-4 mt-2">
+                  <ul className="list-disc pl-4">
                     {rooms.map((availableRoom) => (
                       <li key={availableRoom} className="mt-2">
                         <button
@@ -139,7 +182,7 @@ export default function ChatBox() {
                 </div>
 
                 {/* Create Room */}
-                <div className="flex space-x-2 mt-4">
+                <div className="flex space-x-2">
                   <input
                     type="text"
                     placeholder="Enter new room name"
@@ -159,14 +202,14 @@ export default function ChatBox() {
                 <button
                   className="p-2 mt-4 text-white bg-blue-500 rounded-lg"
                   onClick={handleJoinRoom}
-                  disabled={!room}
+                  disabled={!room || !userName} 
                 >
                   Join Room
                 </button>
               </div>
             ) : (
               <div className="w-full max-w-3xl mx-auto">
-                <h1 className="mb-4 text-md text-gray-900">You are in room: {room}</h1>
+                <h1 className="mb-4 text-md text-white">You are in room: {room}</h1>
                 <div className="h-[200px] overflow-y-auto p-4 mb-4 bg-gray-200 border-2 text-black rounded-lg">
                   <div>
                     {messages.map((msg, index) => (
