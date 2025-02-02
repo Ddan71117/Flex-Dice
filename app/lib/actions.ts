@@ -4,6 +4,7 @@ import { User } from './definitions'
 import bcrypt from 'bcryptjs';
 import { signIn } from '../../auth'
 import { AuthError } from 'next-auth'
+import { signOut as authSignOut  } from '../../auth'
 
 
 
@@ -64,3 +65,8 @@ export async function authenticate(
     }
   }
 
+  export async function serverSignOut() {
+    return authSignOut();
+  }
+
+  

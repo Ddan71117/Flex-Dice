@@ -18,7 +18,7 @@ const Nav: React.FC = () => {
     setIsLoggedIn(loggedInUser);
   }, []);
 
-  const isMainPage = pathname === "/"; // Check if it's the main page
+  const isMainPage = pathname === "/gamepage"; // Check if it's the main page
   const isLoginPage = pathname === "/login"; // Check if it's the login page
   const isSignupPage = pathname === "/signup"; // Check if it's the signup page
 
@@ -33,11 +33,11 @@ const Nav: React.FC = () => {
     <nav className="fixed top-0 left-0 w-full bg-gray-800 p-4 h-19 text-white flex justify-between items-center z-30">
       <div className="text-7xl font-semibold text-center">Flex-Dice</div>
       {/* Show DiceCluster only on the main page '/' if not logged in */}
-      {/* {isMainPage && !isLoggedIn && (
+      {isMainPage && !isLoggedIn && (
         <div className="">
           <MainDropdown />
         </div>
-      )} */}
+      )}
 
       {/* Show AvatarCarousel only on the login page '/login' */}
       {isLoginPage && !isLoggedIn && (

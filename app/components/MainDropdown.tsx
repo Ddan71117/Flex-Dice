@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import Link from "next/link";
 import AvatarCarousel from './AvatarCarousel'; 
+import { serverSignOut} from '../lib/actions';
 
 
 const MainDropdown: React.FC = () => {
@@ -121,21 +122,16 @@ useEffect(() => {
             </ul>
           )}
 
-          {/* Show logout only when logged in */}
-          {isLoggedIn && (
-            <ul className="py-2">
-              <li>
-              <Link href="/" passHref>
+          <form
+            action={serverSignOut}
+            >
           <button
             onClick={handleLogout} // Handle logout
             className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white"
           >
             Sign out
           </button>
-        </Link>
-              </li>
-            </ul>
-          )}
+          </form>
         </div>
       )}
 
