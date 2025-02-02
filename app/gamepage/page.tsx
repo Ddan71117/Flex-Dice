@@ -22,7 +22,7 @@ const GamePage: React.FC = () => {
       <PokerTable /> Render PokerTable here
       <ChatBox />
       <GameLog />
-      //{" "}
+      {/* //{" "} */}
     </div>
   );
 };
