@@ -5,6 +5,7 @@ import Game from './gameLogic'; // Adjust the path as necessary
 const PokerTable: React.FC = () => {
   const { players, gameLog, handleTurn, winner } = Game(); // Use Game as a hook
   const [currentUserAvatar, setCurrentUserAvatar] = useState<string | undefined>();
+  const [ randomNumber, setRandomNumber ]  = useState<number>(0)
 
   useEffect(() => {
     // Retrieve the current user's avatar from local storage
@@ -14,9 +15,13 @@ const PokerTable: React.FC = () => {
     }
   }, []);
 
+  useEffect(() => {
+    setRandomNumber(Math.floor(Math.random() * 5) + 1);
+  }, []);
+
   // Function to get a random avatar for other players
   const getRandomAvatar = (playerId: number): string => {
-    const randomAvatarNumber = Math.floor(Math.random() * 5) + 1; // Assuming you have 5 random avatars
+    const randomAvatarNumber = randomNumber; // Assuming you have 5 random avatars
     return `/images/avatar${randomAvatarNumber}.png`; // Adjust the naming convention as necessary
   };
 

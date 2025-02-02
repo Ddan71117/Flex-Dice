@@ -1,6 +1,6 @@
 "use client";
 
-import Layout from "../layout";
+
 import { useActionState } from 'react';
 import { authenticate } from '../lib/actions'
 const LoginPage: React.FC = () => {
@@ -10,10 +10,9 @@ const LoginPage: React.FC = () => {
   );
 
   return (
-    <Layout>
+    
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-black-500 to-indigo-500">
         <div className="bg-gray-800 p-6 rounded-lg shadow-md w-full sm:w-96">
-          
               <h2 className="text-2xl font-semibold mb-4 text-white">Login</h2>
               {errorMessage && (
                 <div className="text-red-500 text-sm mb-4">{errorMessage}</div>
@@ -55,7 +54,6 @@ const LoginPage: React.FC = () => {
         
         </div>
       </div>
-    </Layout>
   );
 };
 

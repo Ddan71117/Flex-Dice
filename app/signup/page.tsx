@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState } from "react";
-import Layout from "../layout";
 import { createUser } from "../lib/actions";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -35,7 +34,6 @@ const SignUpPage: React.FC = () => {
   }    
 
   return (
-    <Layout>
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-black-500 to-indigo-500">
         <div className="bg-gray-800 p-6 rounded-lg shadow-md w-full sm:w-96">
           <h2 className="text-2xl font-semibold mb-4 text-white">Sign Up</h2>
@@ -126,7 +124,6 @@ const SignUpPage: React.FC = () => {
           </form>
         </div>
       </div>
-    </Layout>
   );
 };
 
