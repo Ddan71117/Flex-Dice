@@ -1,37 +1,39 @@
 "use client";
 
 import React, { useState } from "react";
-import Layout from "@/app/layout";
+import { createUser } from "../lib/actions";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { FaEye, FaEyeSlash } from "react-icons/fa"; 
 
 
 const SignUpPage: React.FC = () => {
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState(""); 
   const [passwordVisible, setPasswordVisible] = useState(false); 
   const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false); 
   const [errorMessage, setErrorMessage] = useState("");
+  const router = useRouter();
 
-  const handleSignUp = (e: React.FormEvent) => {
+  const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Check if passwords match
-    if (password !== confirmPassword) {
-      setErrorMessage("Passwords do not match.");
-      return;
+    const formData = new FormData();
+    formData.append("username", username);
+    formData.append("password", password);
+
+    try {
+      console.log(formData)
+      await createUser(undefined, formData);
+      setErrorMessage("")
+      router.push("/login");
+    } catch (error) {
+      setErrorMessage("Failed to create user")
+      console.log(error)
     }
-    // Check if email or password is empty
-    if (email === "" || password === "") {
-      setErrorMessage("Please fill in all fields.");
-      return;
-    }
-    setErrorMessage(""); // Reset error message if everything is valid
-    // add sign-up logic with JWT here
-  };
+  }    
 
   return (
-    <Layout>
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-black-500 to-indigo-500">
         <div className="bg-gray-800 p-6 rounded-lg shadow-md w-full sm:w-96">
           <h2 className="text-2xl font-semibold mb-4 text-white">Sign Up</h2>
@@ -42,16 +44,16 @@ const SignUpPage: React.FC = () => {
 
           <form onSubmit={handleSignUp}>
             <div className="mb-4">
-              <label htmlFor="email" className="block text-gray-300">
-                Email
+              <label htmlFor="username" className="block text-gray-300">
+                Username
               </label>
               <input
-                type="email"
-                id="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                type="text"
+                id="username"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
                 className="mt-2 w-full px-3 py-2 border border-gray-500 rounded-md bg-gray-700 text-white focus:ring-blue-500 focus:border-blue-500"
-                placeholder="Enter email"
+                placeholder="Enter username"
               />
             </div>
 
@@ -122,7 +124,6 @@ const SignUpPage: React.FC = () => {
           </form>
         </div>
       </div>
-    </Layout>
   );
 };
 

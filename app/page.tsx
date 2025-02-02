@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import Layout from "./layout";
 
 export default function Page() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -15,7 +14,6 @@ export default function Page() {
   }, []);
 
   return (
-    <Layout>
       <main className="min-h-screen flex items-center justify-center bg-gradient-to-r from-black-500 to-indigo-500">
         {" "}
         <div className="flex flex-col items-center bg-gray-800 p-6 rounded-lg shadow-md w-full sm:w-96">
@@ -48,6 +46,5 @@ export default function Page() {
           </div>
         </div>
       </main>
-    </Layout>
   );
 }

@@ -4,7 +4,6 @@ import DiceCluster from '../components/DiceCluster';
 import ChatBox from '../components/ChatBox';
 import Stats from '../components/Stats';
 import MainDropdown from '../components/MainDropdown';
-import Layout from "../layout";
 import PokerTable from '../components/gametable'; // Import PokerTable
 
 const GamePage: React.FC = () => {
@@ -20,13 +19,12 @@ const GamePage: React.FC = () => {
 
   return (
     <div className="relative min-h-screen bg-transparent">
-      <Layout>
         <MainDropdown />
-        <PokerTable /> {/* Render PokerTable here */}
-      </Layout>
+        <PokerTable /> Render PokerTable here
+       
       <ChatBox />
       <Stats />
-    </div>
+  //   </div>
   );
 };
 

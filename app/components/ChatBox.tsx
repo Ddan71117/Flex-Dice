@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { socket } from "../lib/socketClient"; // assuming this is your socket connection setup
-import ChatForm from "../components/ChatForm";
-import ChatMessage from "../components/ChatMessage";
+import ChatForm from "./ChatForm";
+import ChatMessage from "./ChatMessage";
 import "../globals.css";
 
 export default function ChatBox() {
