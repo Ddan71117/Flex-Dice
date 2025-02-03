@@ -28,6 +28,8 @@ const LoginPage: React.FC = () => {
 
     try {
       await authenticate(username, password);
+
+
       router.push("/rules");
     } catch (error) {
       setErrorMessage(

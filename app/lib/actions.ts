@@ -1,6 +1,7 @@
 "use server";
 import { neon } from "@neondatabase/serverless";
 import bcryptjs from "bcryptjs";
+import NextAuth from '../pages/api/auth/[...nextauth]';
 
 // Initialize Neon connection
 const sql = neon(process.env.DATABASE_URL || "");
@@ -8,18 +9,19 @@ const sql = neon(process.env.DATABASE_URL || "");
 // Function to authenticate user
 export async function authenticate(username: string, password: string) {
   try {
-    const user = await getUserByUsername(username);
-
+    // const user = await getUserByUsername(username);
+    const user = await NextAuth.signIn('credentials', { username, password, redirect: false }) // Use;
+    console.log("User: ", user);
     if (!user) {
       throw new Error("User not found");
     }
 
-    const isMatch = await bcryptjs.compare(password, user.password);
+    // const isMatch = await bcryptjs.compare(password, user.password);
 
-    if (!isMatch) {
-      throw new Error("Invalid credentials");
-    }
-
+    // if (!isMatch) {
+    //   throw new Error("Invalid credentials");
+    // }
+    console.log("User: ", user);
     return user;
   } catch (error) {
     console.error("Error authenticating user:", error);

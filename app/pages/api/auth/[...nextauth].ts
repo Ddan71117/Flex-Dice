@@ -9,6 +9,7 @@ interface User {
   password: string;
 }
 
+
 export default NextAuth({
   providers: [
     CredentialsProvider({
@@ -18,6 +19,7 @@ export default NextAuth({
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials: Partial<Record<string, unknown>>): Promise<Omit<User, "password"> | null> {
+        console.log('authorize function', credentials.username, credentials.password )
         if (!credentials?.username || !credentials?.password) {
           console.error("Missing username or password");
           return null;
@@ -28,8 +30,9 @@ export default NextAuth({
           const password = String(credentials.password);
 
           // Fetch user from database
-          const result = await getUserByUsername(username);
-          const user: User | undefined = result?.[0];
+          const user = await getUserByUsername(username);
+          console.log(user)
+          // const user: User | undefined = result?.[0];
 
           if (!user) {
             console.error(`User with username ${username} not found.`);
@@ -57,13 +60,20 @@ export default NextAuth({
   },
   session: {
     strategy: "jwt",
+    maxAge: 30 * 24 * 60 * 60,
+
   },
   callbacks: {
     async jwt({ token, user }) {
+      console.log('token1', token);
+      console.log('user1', user);
+
       if (user) {
         token.id = user.id;
         token.username = user.username;
       }
+      console.log('token2', token);
+      console.log('user2', user);
       return token;
     },
     async session({ session, token }) {
@@ -72,8 +82,10 @@ export default NextAuth({
       }
       session.user.id = token.id as string;
       session.user.username = token.username as string;
+      console.log('session', session);
       return session;
     },
   },
+  
   secret: process.env.NEXTAUTH_SECRET,
 });
