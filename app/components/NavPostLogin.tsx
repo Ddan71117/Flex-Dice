@@ -1,41 +1,42 @@
-"use client";
-
-import React from "react";
-import { useState, useEffect } from "react";
-import { usePathname, useRouter } from "next/navigation"; // Import usePathname and useRouter from next/navigation
-import Link from "next/link"; // Import Link from next/link
+import React, { useState, useEffect } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import Link from "next/link";
 import RulesRef from "./Rulesref";
-import { serverSignOut } from "../lib/actions";
+import AvatarCarousel from "./AvatarCarousel";
 
 const Nav: React.FC = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState(false); // Track login state
-  const [avatarSelected, setAvatarSelected] = useState(false); // Track avatar selection
-  const pathname = usePathname(); // Get current path
-  const router = useRouter(); // Initialize useRouter
-  const [showRules, setShowRules] = useState(false); // Track hover state
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [avatarSelected, setAvatarSelected] = useState(false);
+  const pathname = usePathname();
+  const router = useRouter();
+  const [showRules, setShowRules] = useState(false);
 
-  // Simulate login for testing (you can replace this with your actual authentication logic)
+  // Check if user is logged in
   useEffect(() => {
-    // Check if the user is logged in (use session data, cookies, or localStorage in a real app)
-    const loggedInUser = false; // Simulate a logged-in state (change to true to test)
+    const loggedInUser = true;
     setIsLoggedIn(loggedInUser);
   }, []);
 
-  const isMainPage = pathname === "/"; // Check if it's the main page
-  const isLoginPage = pathname === "/login"; // Check if it's the login page
-  const isSignupPage = pathname === "/signup"; // Check if it's the signup page
-  const isGamePage = pathname === "/gamepage"; // Check if it's the game page
-  const isRules = pathname === "/rules"; // Check if it's the rules page
+  const isGamePage = pathname === "/gamepage";
+  const isRules = pathname === "/rules";
 
-  // Handle avatar selection (this could be done by setting the avatar after signup)
   const handleAvatarSelection = (avatar: string) => {
     setAvatarSelected(true);
-    setIsLoggedIn(true); // Simulate manual login after avatar selection
+    setIsLoggedIn(true);
   };
 
   const handleSignOut = async () => {
-    await serverSignOut();
-    router.push("/");
+    try {
+      const res = await fetch("/pages/api/logout", { method: "POST" });
+      if (res.ok) {
+        setIsLoggedIn(false);
+        router.push("/");
+      } else {
+        console.error("Logout failed:", res.statusText);
+      }
+    } catch (error) {
+      console.error("Error signing out:", error);
+    }
   };
 
   return (
@@ -44,28 +45,37 @@ const Nav: React.FC = () => {
         Flex-Dice
       </div>
       <div className="p-4" style={{ marginRight: "17%" }}>
-        {isGamePage && ( // Only show the button on the game page
-          <div
-            onMouseEnter={() => setShowRules(true)}
-            onMouseLeave={() => setShowRules(false)}
-            className="relative"
-          >
+        {isGamePage && (
+          <div className="flex space-x-4">
+            <div
+              onMouseEnter={() => setShowRules(true)}
+              onMouseLeave={() => setShowRules(false)}
+              className="relative"
+            >
+              <button
+                type="button"
+                className="bg-teal-500 text-white py-2 px-4 rounded-md hover:bg-teal-600"
+              >
+                Rules
+              </button>
+              <div
+                className={`absolute left-1/2 transform -translate-x-1/2 mt-2 transition-all duration-300 ease-in-out overflow-hidden ${
+                  showRules ? "max-h-screen opacity-100" : "max-h-0 opacity-0"
+                }`}
+              >
+                {showRules && <RulesRef />}
+              </div>
+            </div>
             <button
               type="button"
+              onClick={handleSignOut}
               className="bg-teal-500 text-white py-2 px-4 rounded-md hover:bg-teal-600"
             >
-              Rules
+              Sign out
             </button>
-            <div
-              className={`absolute left-1/2 transform -translate-x-1/2 mt-2 transition-all duration-300 ease-in-out overflow-hidden ${
-                showRules ? "max-h-screen opacity-100" : "max-h-0 opacity-0"
-              }`}
-            >
-              {showRules && <RulesRef />}
-            </div>
           </div>
         )}
-        {isRules && ( // Only show the button on the rules page
+        {isRules && (
           <div className="flex space-x-4">
             <Link href="/gamepage">
               <button
@@ -84,12 +94,14 @@ const Nav: React.FC = () => {
             </button>
           </div>
         )}
-        {!isRules && (
-          <form action={serverSignOut}>
-            <button className="bg-teal-500 text-white py-2 px-4 rounded-md hover:bg-teal-600">
-              Sign out
-            </button>
-          </form>
+        {isLoggedIn && !isRules && !isGamePage && (
+          <button
+            type="button"
+            onClick={handleSignOut}
+            className="bg-teal-500 text-white py-2 px-4 rounded-md hover:bg-teal-600"
+          >
+            Sign out
+          </button>
         )}
       </div>
     </nav>

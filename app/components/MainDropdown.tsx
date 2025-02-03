@@ -2,7 +2,8 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import AvatarCarousel from "./AvatarCarousel";
-import { serverSignOut } from "../lib/actions";
+import { logout } from "../lib/actions";
+import { log } from "console";
 
 const MainDropdown: React.FC = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -129,7 +130,7 @@ const MainDropdown: React.FC = () => {
             </ul>
           )}
 
-          <form action={serverSignOut}>
+          <form action={logout}>
             <button
               onClick={handleLogout} // Handle logout
               className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white"

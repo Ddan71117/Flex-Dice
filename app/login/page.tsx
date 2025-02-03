@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useActionState } from "react";
+import { useState, useEffect } from "react";
 import { authenticate } from "../lib/actions";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import Link from "next/link";
@@ -8,10 +8,10 @@ import { useRouter } from "next/navigation";
 
 const LoginPage: React.FC = () => {
   const [passwordVisible, setPasswordVisible] = useState(false);
-  const [errorMessage, formAction, isPending] = useActionState(
-    authenticate,
-    undefined
-  );
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
+  const [isPending, setIsPending] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
   const router = useRouter();
 
@@ -20,6 +20,23 @@ const LoginPage: React.FC = () => {
       setIsAnimating(true);
     }, 50);
   }, []);
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsPending(true);
+    setErrorMessage("");
+
+    try {
+      await authenticate(username, password);
+      router.push("/rules");
+    } catch (error) {
+      setErrorMessage(
+        "Failed to log in. Please check your username or password."
+      );
+    } finally {
+      setIsPending(false);
+    }
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-black-500 to-indigo-500">
@@ -31,24 +48,28 @@ const LoginPage: React.FC = () => {
         <h2 className="text-2xl font-semibold text-center mb-4 text-white">
           Login
         </h2>
+
         {errorMessage && (
           <div className="text-red-500 text-sm mb-4">{errorMessage}</div>
         )}
-        <form action={formAction}>
+
+        <form onSubmit={handleLogin}>
           <div className="mb-4">
-            <label htmlFor="email" className="block text-gray-300">
-              Email
+            <label htmlFor="username" className="block text-gray-300">
+              Username
             </label>
             <input
               className="mt-2 w-full px-3 py-2 border border-gray-500 rounded-md bg-gray-700 text-white focus:ring-blue-500 focus:border-blue-500"
-              type="email"
-              id="email"
-              name="email"
-              placeholder="Enter email"
+              type="text"
+              id="username"
+              name="username"
+              placeholder="Enter username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
               required
-              minLength={1}
             />
           </div>
+
           <div className="mb-4">
             <label htmlFor="password" className="block text-gray-300">
               Password
@@ -60,6 +81,8 @@ const LoginPage: React.FC = () => {
                 id="password"
                 name="password"
                 placeholder="Enter password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
                 required
                 minLength={6}
               />
@@ -75,12 +98,15 @@ const LoginPage: React.FC = () => {
               </div>
             </div>
           </div>
+
           <button
-            className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700"
-            aria-disabled={isPending}
+            type="submit"
+            className="w-full bg-teal-500 text-white py-2 rounded-md hover:bg-teal-600"
+            disabled={isPending}
           >
-            Log In
+            {isPending ? "Logging In..." : "Log In"}
           </button>
+
           <p className="text-gray-300 text-sm mt-4">
             Don't have an account?{" "}
             <Link href="/signup" className="text-blue-500 hover:underline">
