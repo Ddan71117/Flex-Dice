@@ -2,10 +2,24 @@ import type { NextAuthConfig }  from 'next-auth';
  
 export const authConfig = {
   pages: {
-    signIn: '/login',
+    signIn: '/',
   },
+  
   callbacks: {
-    async authorized({ auth, request: { nextUrl } }) {
+      async signIn({ user, account, profile, email, credentials }) {
+        console.log('signIn callback - user:', user);
+        console.log('signIn callback - account:', account);
+        console.log('signIn callback - credentials:', credentials);
+        return true;
+      },
+        async session({ session, token, user }) {
+          console.log('session callback - session:', session);
+          console.log('session callback - token:', token);
+          console.log('session callback - user:', user);
+          return session;
+      },
+      
+    authorized({ auth, request: { nextUrl } }) {
       const isLoggedIn = !!auth?.user;
       console.log('auth:', auth)
       console.log('nexturl:', nextUrl)

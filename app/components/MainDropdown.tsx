@@ -1,7 +1,8 @@
 "use client";
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import AvatarCarousel from "./AvatarCarousel";
-import { signOut } from "next-auth/react";
+import { serverSignOut } from "../lib/actions";
 
 const MainDropdown: React.FC = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -98,24 +99,44 @@ const MainDropdown: React.FC = () => {
 
       {isDropdownOpen && isLoggedIn && (
         <div className="dropdown absolute left-10 top-16 z-50 mt-2 w-48 bg-white divide-y divide-gray-100 rounded-lg shadow-sm dark:bg-gray-700 dark:divide-gray-600">
-          <div className="px-4 py-3">
-            <span className="block text-sm text-gray-900 dark:text-white">
-              {username || "UserNameHere"}
-            </span>
-            <span className="block text-sm text-gray-500 truncate dark:text-gray-400">
-              {userEmail || "test@gmail.com"}
-            </span>
+          {isLoggedIn ? (
+            <div className="px-4 py-3">
+              <span className="block text-sm text-gray-900 dark:text-white">
+                {localStorage.getItem("userName") || "UserNameHere"}
+              </span>
+              <span className="block text-sm text-gray-500 truncate dark:text-gray-400">
+                {localStorage.getItem("userEmail") || "test@gmail.com"}
+              </span>
+            </div>
+          ) : (
             <ul className="py-2">
               <li>
-                <button
-                  onClick={handleLogout} // Handle logout
-                  className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white"
+                <Link
+                  href="/"
+                  className="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-500 dark:text-gray-200 dark:hover:bg-blue-600"
                 >
-                  Sign out
-                </button>
+                  Login
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/signup"
+                  className="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-500 dark:text-gray-200 dark:hover:bg-green-600"
+                >
+                  Signup
+                </Link>
               </li>
             </ul>
-          </div>
+          )}
+
+          <form action={serverSignOut}>
+            <button
+              onClick={handleLogout} // Handle logout
+              className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white"
+            >
+              Sign out
+            </button>
+          </form>
         </div>
       )}
 

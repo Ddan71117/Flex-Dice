@@ -7,7 +7,8 @@ import Link from "next/link";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 
 const SignUpPage: React.FC = () => {
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
+  const [name, setName] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [passwordVisible, setPasswordVisible] = useState(false);
@@ -25,7 +26,8 @@ const SignUpPage: React.FC = () => {
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     const formData = new FormData();
-    formData.append("username", username);
+    formData.append("email", email);
+    formData.append("name", name);
     formData.append("password", password);
 
     try {
@@ -58,16 +60,29 @@ const SignUpPage: React.FC = () => {
 
         <form onSubmit={handleSignUp}>
           <div className="mb-4">
-            <label htmlFor="username" className="block text-gray-300">
-              Username
+            <label htmlFor="name" className="block text-gray-300">
+              Name
             </label>
             <input
               type="text"
-              id="username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
+              id="name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
               className="mt-2 w-full px-3 py-2 border border-gray-500 rounded-md bg-gray-700 text-white focus:ring-blue-500 focus:border-blue-500"
-              placeholder="Enter username"
+              placeholder="Enter name"
+            />
+          </div>
+          <div className="mb-4">
+            <label htmlFor="email" className="block text-gray-300">
+              Email
+            </label>
+            <input
+              type="email"
+              id="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="mt-2 w-full px-3 py-2 border border-gray-500 rounded-md bg-gray-700 text-white focus:ring-blue-500 focus:border-blue-500"
+              placeholder="Enter email"
             />
           </div>
 
