@@ -157,7 +157,7 @@ export default function ChatBox() {
 
                 {/* Available Rooms */}
                 <div className="mt-2 w-full max-h-[80px] overflow-y-auto">
-                  <h2 className="mt-2 text-lg font-bold text-white text-sm">
+                  <h2 className="mt-2 font-bold text-white text-sm">
                     Available Rooms listed:
                   </h2>
                   <br />

@@ -34,7 +34,14 @@ export const authConfig = {
       return true;
     },
     async redirect({ url, baseUrl }) {
-      if (url.startsWith(baseUrl)) return url;
+      console.log("Redirect callback - url:", url);
+      console.log("Redirect callback - baseUrl:", baseUrl);
+      if (url === baseUrl || url.startsWith(baseUrl)) {
+        return baseUrl; // Redirect to home page after logout
+      }
+      if (url === baseUrl + '/rules') {
+        return url; // Ensure the URL is correctly set to /rules after login
+      }
       // Redirect to rules page after login
       return baseUrl + '/rules';
     },
