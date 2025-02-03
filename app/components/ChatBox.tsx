@@ -126,7 +126,7 @@ export default function ChatBox() {
       {/* Button to open the chat modal positioned at the lower-right */}
       <button
         onClick={openModal}
-        className="fixed bottom-4 left-4 h-14 px-6 m-2 text-lg text-indigo-100 transition-colors duration-150 bg-indigo-700 rounded-lg focus:shadow-outline hover:bg-indigo-800"
+        className="fixed bottom-4 left-4 h-14 px-6 m-2 text-lg text-white transition-colors duration-150 bg-teal-500 rounded-lg focus:shadow-outline hover:bg-teal-600"
       >
         Open Chat Room
       </button>

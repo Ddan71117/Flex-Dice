@@ -1,20 +1,20 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { createUser } from "../lib/actions";
+import { createUser } from "../lib/actions"; // Import the createUser function
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 
 const SignUpPage: React.FC = () => {
-  const [email, setEmail] = useState("");
-  const [name, setName] = useState("");
+  const [username, setUsername] = useState(""); // Changed from email to username
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [isAnimating, setIsAnimating] = useState(false); // Track animation state
+  const [isSignupSuccess, setIsSignupSuccess] = useState(false); // Track signup success
   const router = useRouter();
 
   useEffect(() => {
@@ -25,19 +25,34 @@ const SignUpPage: React.FC = () => {
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
-    const formData = new FormData();
-    formData.append("email", email);
-    formData.append("name", name);
-    formData.append("password", password);
+
+    if (password !== confirmPassword) {
+      setErrorMessage("Passwords do not match");
+      return;
+    }
 
     try {
-      console.log(formData);
-      await createUser(undefined, formData);
+      // Attempt to create the user
+      await createUser(username, password); // Now passing only username and password
       setErrorMessage("");
-      router.push("/login");
+      setIsSignupSuccess(true); // Set signup success to true
+
+      // Redirect to login page after a delay to show the success message
+      setTimeout(() => {
+        router.push("/login");
+      }, 2000); // Delay the redirect by 2 seconds
     } catch (error) {
-      setErrorMessage("Failed to create user");
-      console.log(error);
+      // If the error is related to username being already taken, display a custom message
+      if (
+        error instanceof Error &&
+        error.message === "Username already taken"
+      ) {
+        setErrorMessage("Username already taken. Please choose another.");
+      } else {
+        // Log other unexpected errors for debugging
+        setErrorMessage("Failed to create user. Please try again.");
+        console.error("Unexpected error:", error); // Log only unexpected errors
+      }
     }
   };
 
@@ -58,31 +73,25 @@ const SignUpPage: React.FC = () => {
           <div className="text-red-500 text-sm mb-4">{errorMessage}</div>
         )}
 
+        {/* Success notification */}
+        {isSignupSuccess && (
+          <div className="text-green-500 text-sm mb-4 text-center">
+            Signup successful! Redirecting to login...
+          </div>
+        )}
+
         <form onSubmit={handleSignUp}>
           <div className="mb-4">
-            <label htmlFor="name" className="block text-gray-300">
-              Name
+            <label htmlFor="username" className="block text-gray-300">
+              Username
             </label>
             <input
               type="text"
-              id="name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
+              id="username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
               className="mt-2 w-full px-3 py-2 border border-gray-500 rounded-md bg-gray-700 text-white focus:ring-blue-500 focus:border-blue-500"
-              placeholder="Enter name"
-            />
-          </div>
-          <div className="mb-4">
-            <label htmlFor="email" className="block text-gray-300">
-              Email
-            </label>
-            <input
-              type="email"
-              id="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="mt-2 w-full px-3 py-2 border border-gray-500 rounded-md bg-gray-700 text-white focus:ring-blue-500 focus:border-blue-500"
-              placeholder="Enter email"
+              placeholder="Enter username"
             />
           </div>
 

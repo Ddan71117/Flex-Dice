@@ -1,73 +1,94 @@
-'use server'
-import { sql } from '@vercel/postgres'
-import { User } from './definitions'
-import bcrypt from 'bcryptjs';
-import { signIn } from '../../auth'
-import { AuthError } from 'next-auth'
-import { signOut as authSignOut  } from '../../auth'
+"use server";
+import { neon } from "@neondatabase/serverless";
+import bcryptjs from "bcryptjs";
 
+// Initialize Neon connection
+const sql = neon(process.env.DATABASE_URL || "");
 
+// Function to authenticate user
+export async function authenticate(username: string, password: string) {
+  try {
+    const user = await getUserByUsername(username);
 
-
-export async function createUser(prevState: string | undefined, formData: FormData) {
-    console.log(process.env.POSTGRES_URL)
-    if (!process.env.POSTGRES_URL) {
-        throw new Error("Missing database connection string.");
-      }
-    const name = formData.get('name')?.toString();
-    const email = formData.get('email')?.toString();
-    const password = formData.get('password')?.toString();
-
-    if(!name || !email || !password) {
-        return 'All fields are required'
+    if (!user) {
+      throw new Error("User not found");
     }
 
-    if (password.length < 6) {
-        return 'Password must be at least 6 characters long.';
-        
-    }
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const isMatch = await bcryptjs.compare(password, user.password);
 
-    try {
-        await sql<User>`
-        INSERT INTO users1 (name, email, password)
-        VALUES (${name}, ${email}, ${hashedPassword})
-        `
-    } catch (error) {
-        console.error('Failed to create user:', error)
-        throw new Error('Failed to create user.')
+    if (!isMatch) {
+      throw new Error("Invalid credentials");
     }
-    
+
+    return user;
+  } catch (error) {
+    console.error("Error authenticating user:", error);
+    throw error;
+  }
 }
 
+// Function to create users table
+export async function createUsersTable() {
+  try {
+    await sql`
+      CREATE TABLE IF NOT EXISTS users (
+        id SERIAL PRIMARY KEY,
+        username VARCHAR(255) UNIQUE NOT NULL,
+        password VARCHAR(255) NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+    `;
+    console.log("Users table created successfully.");
+  } catch (error) {
+    console.error("Error creating users table:", error);
+  }
+}
 
-export async function authenticate(
-    prevState: string | undefined,
-    formData: FormData,
-  ) {
-    try {
-            const email = formData.get('email')?.toString();
-            const password = formData.get('password')?.toString();
-        
-            if (!email || !password) {
-              return 'All fields are required.';
-            }
-      await signIn('credentials', formData);
-    } catch (error) {
-      if (error instanceof AuthError) {
-        switch (error.type) {
-          case 'CredentialsSignin':
-            return 'Invalid credentials.';
-          default:
-            return 'Something went wrong.';
-        }
-      }
-      throw error;
+// Function to retrieve user by username
+export async function getUserByUsername(username: string) {
+  try {
+    const result = await sql`
+      SELECT * FROM users WHERE username = ${username}
+    `;
+    return result ? result[0] : null;
+  } catch (error) {
+    console.error("Error retrieving user by username:", error);
+    return null;
+  }
+}
+
+// Function to insert new user into the database
+export async function createUser(username: string, password: string) {
+  try {
+    // Check if username already exists
+    const existingUser = await getUserByUsername(username);
+    if (existingUser) {
+      throw new Error("Username already taken");
     }
-  }
 
-  export async function serverSignOut() {
-    return authSignOut();
-  }
+    // Hash the password asynchronously
+    const hashedPassword = await bcryptjs.hash(password, 10);
 
-  
+    // Insert the new user into the database
+    await sql`
+      INSERT INTO users (username, password)
+      VALUES (${username}, ${hashedPassword})
+    `;
+    console.log("User inserted successfully.");
+    return { success: true }; // Return something to indicate success
+  } catch (error) {
+    console.error("Error inserting user:", error);
+    throw error; // Rethrow the error so it can be handled by the caller
+  }
+}
+
+// Logout function - to be called server-side
+export async function logout(response: any) {
+  try {
+    // Clear cookies or session
+    response.clearCookie("session_id"); // You may need to adjust based on your session management
+    console.log("User logged out successfully.");
+  } catch (error) {
+    console.error("Error logging out user:", error);
+  }
+}
