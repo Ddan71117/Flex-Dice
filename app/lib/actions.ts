@@ -14,10 +14,11 @@ export async function createUser(prevState: string | undefined, formData: FormDa
     if (!process.env.POSTGRES_URL) {
         throw new Error("Missing database connection string.");
       }
-    const username = formData.get('username')?.toString();
+    const name = formData.get('name')?.toString();
+    const email = formData.get('email')?.toString();
     const password = formData.get('password')?.toString();
 
-    if(!username ||  !password) {
+    if(!name || !email || !password) {
         return 'All fields are required'
     }
 
@@ -29,8 +30,8 @@ export async function createUser(prevState: string | undefined, formData: FormDa
 
     try {
         await sql<User>`
-        INSERT INTO users (username,  password)
-        VALUES (${username}, ${hashedPassword})
+        INSERT INTO users1 (name, email, password)
+        VALUES (${name}, ${email}, ${hashedPassword})
         `
     } catch (error) {
         console.error('Failed to create user:', error)
@@ -45,10 +46,10 @@ export async function authenticate(
     formData: FormData,
   ) {
     try {
-            const username = formData.get('username')?.toString();
+            const email = formData.get('email')?.toString();
             const password = formData.get('password')?.toString();
         
-            if (!username || !password) {
+            if (!email || !password) {
               return 'All fields are required.';
             }
       await signIn('credentials', formData);
