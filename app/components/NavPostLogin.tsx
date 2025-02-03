@@ -4,6 +4,7 @@ import React from "react";
 import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation"; // Import usePathname from next/navigation
 import RulesRef from "./Rulesref";
+import { serverSignOut } from "../lib/actions";
 
 const Nav: React.FC = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false); // Track login state
@@ -53,10 +54,19 @@ const Nav: React.FC = () => {
               }`}
             >
               {showRules && <RulesRef />}
-            </div>
+            </div>         
           </div>
         )}
-      </div>
+        <form
+            action={serverSignOut}
+          >
+            <button className="bg-red-500 text-white py-2 px-4 rounded-md hover:bg-teal-600"
+            >
+              Sign out
+            </button>
+          </form>
+        </div>
+      
     </nav>
   );
 };

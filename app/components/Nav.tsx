@@ -18,7 +18,7 @@ const Nav: React.FC = () => {
     setIsLoggedIn(loggedInUser);
   }, []);
 
-  const isMainPage = pathname === "/"; // Check if it's the main page
+  const isMainPage = pathname === "/gamepage"; // Check if it's the main page
   const isLoginPage = pathname === "/login"; // Check if it's the login page
   const isSignupPage = pathname === "/signup"; // Check if it's the signup page
 
