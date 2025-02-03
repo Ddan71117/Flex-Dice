@@ -32,9 +32,9 @@ export default function GameLog() {
     <div>
       <button
         onClick={openModal}
-        className="fixed bottom-4 right-4 h-14 px-6 m-2 text-lg text-indigo-100 transition-colors duration-150 bg-indigo-700 rounded-lg focus:shadow-outline hover:bg-indigo-800"
+        className="fixed bottom-4 right-4 h-14 px-6 m-2 text-lg text-white transition-colors duration-150 bg-teal-500 rounded-lg focus:shadow-outline hover:bg-teal-600"
       >
-        View Your Stats
+        Game Log
       </button>
 
       {isModalOpen && (

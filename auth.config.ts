@@ -28,10 +28,22 @@ export const authConfig = {
         if (isLoggedIn) return true;
         console.log(isLoggedIn)
         return false; // Redirect unauthenticated users to login page
-      } else if (isLoggedIn) {
-        return Response.redirect(new URL('/gamepage', nextUrl));
+      } else if (isLoggedIn && nextUrl.pathname !== '/rules') {
+        return Response.redirect(new URL('/rules', nextUrl));
       }
       return true;
+    },
+    async redirect({ url, baseUrl }) {
+      console.log("Redirect callback - url:", url);
+      console.log("Redirect callback - baseUrl:", baseUrl);
+      if (url === baseUrl || url.startsWith(baseUrl)) {
+        return baseUrl; // Redirect to home page after logout
+      }
+      if (url === baseUrl + '/rules') {
+        return url; // Ensure the URL is correctly set to /rules after login
+      }
+      // Redirect to rules page after login
+      return baseUrl + '/rules';
     },
   },
   providers: [], // Add providers with an empty array for now

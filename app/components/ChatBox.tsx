@@ -7,12 +7,14 @@ import ChatMessage from "./ChatMessage";
 import "../globals.css";
 
 export default function ChatBox() {
-  const [room, setRoom] = useState(""); 
-  const [rooms, setRooms] = useState<string[]>([]); 
-  const [userName, setUserName] = useState("User"); 
-  const [joined, setJoined] = useState(false); 
-  const [messages, setMessages] = useState<{ sender: string; message: string }[]>([]); 
-  const [isModalOpen, setIsModalOpen] = useState(false); 
+  const [room, setRoom] = useState("");
+  const [rooms, setRooms] = useState<string[]>([]);
+  const [userName, setUserName] = useState("User");
+  const [joined, setJoined] = useState(false);
+  const [messages, setMessages] = useState<
+    { sender: string; message: string }[]
+  >([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   //for getting uses from auth but not sure api/route
   // const fetchUser = async () => {
@@ -40,11 +42,11 @@ export default function ChatBox() {
 
   // Fetch available rooms when the component mounts
   useEffect(() => {
-    socket.emit("get-available-rooms"); 
+    socket.emit("get-available-rooms");
 
     // Listen for updates to the available rooms
     socket.on("availableRooms", (rooms: string[]) => {
-      setRooms(rooms); 
+      setRooms(rooms);
     });
 
     socket.on("message", (data) => {
@@ -67,7 +69,7 @@ export default function ChatBox() {
   const handleJoinRoom = () => {
     if (room && userName) {
       socket.emit("join-room", { room, userName });
-      setJoined(true); 
+      setJoined(true);
     }
   };
 
@@ -114,10 +116,10 @@ export default function ChatBox() {
     setIsModalOpen(false);
   };
 
-    // Handle userName input and set it
-    const handleUserNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-      setUserName(e.target.value);
-    };
+  // Handle userName input and set it
+  const handleUserNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setUserName(e.target.value);
+  };
 
   return (
     <div>
@@ -133,8 +135,10 @@ export default function ChatBox() {
       {isModalOpen && (
         <div className="fixed bottom-4 left-4 w-50 max-w-3xl mx-auto p-4 bg-gray-800 border rounded-lg">
           <div className="bg-gray-800 p-6 rounded-lg w-80 sm:w-96 max-w-sm mx-auto">
-            <h3 className="text-2xl font-bold text-white">Welcome {userName || "Guest"}!</h3>
-            
+            <h3 className="text-2xl font-bold text-white">
+              Welcome {userName || "Guest"}!
+            </h3>
+
             {/* If not joined, show room list and userName input */}
             {!joined ? (
               <div className="flex flex-col">
@@ -153,7 +157,7 @@ export default function ChatBox() {
 
                 {/* Available Rooms */}
                 <div className="mt-2 w-full max-h-[80px] overflow-y-auto">
-                  <h2 className="mt-2 text-lg font-bold text-white text-sm">
+                  <h2 className="mt-2 font-bold text-white text-sm">
                     Available Rooms listed:
                   </h2>
                   <br />
@@ -202,14 +206,16 @@ export default function ChatBox() {
                 <button
                   className="p-2 mt-4 text-white bg-blue-500 rounded-lg"
                   onClick={handleJoinRoom}
-                  disabled={!room || !userName} 
+                  disabled={!room || !userName}
                 >
                   Join Room
                 </button>
               </div>
             ) : (
               <div className="w-full max-w-3xl mx-auto">
-                <h1 className="mb-4 text-md text-white">You are in room: {room}</h1>
+                <h1 className="mb-4 text-md text-white">
+                  You are in room: {room}
+                </h1>
                 <div className="h-[200px] overflow-y-auto p-4 mb-4 bg-gray-200 border-2 text-black rounded-lg">
                   <div>
                     {messages.map((msg, index) => (
@@ -224,10 +230,7 @@ export default function ChatBox() {
                   <ChatForm onSendMessage={handleSendMessage} />
                 </div>
 
-                <button
-                  className="mt-4 text-red-500"
-                  onClick={handleLeaveRoom}
-                >
+                <button className="mt-4 text-red-500" onClick={handleLeaveRoom}>
                   Exit Chat
                 </button>
               </div>

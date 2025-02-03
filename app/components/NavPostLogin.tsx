@@ -2,7 +2,8 @@
 
 import React from "react";
 import { useState, useEffect } from "react";
-import { usePathname } from "next/navigation"; // Import usePathname from next/navigation
+import { usePathname, useRouter } from "next/navigation"; // Import usePathname and useRouter from next/navigation
+import Link from "next/link"; // Import Link from next/link
 import RulesRef from "./Rulesref";
 import { serverSignOut } from "../lib/actions";
 
@@ -10,6 +11,7 @@ const Nav: React.FC = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false); // Track login state
   const [avatarSelected, setAvatarSelected] = useState(false); // Track avatar selection
   const pathname = usePathname(); // Get current path
+  const router = useRouter(); // Initialize useRouter
   const [showRules, setShowRules] = useState(false); // Track hover state
 
   // Simulate login for testing (you can replace this with your actual authentication logic)
@@ -23,11 +25,17 @@ const Nav: React.FC = () => {
   const isLoginPage = pathname === "/login"; // Check if it's the login page
   const isSignupPage = pathname === "/signup"; // Check if it's the signup page
   const isGamePage = pathname === "/gamepage"; // Check if it's the game page
+  const isRules = pathname === "/rules"; // Check if it's the rules page
 
   // Handle avatar selection (this could be done by setting the avatar after signup)
   const handleAvatarSelection = (avatar: string) => {
     setAvatarSelected(true);
     setIsLoggedIn(true); // Simulate manual login after avatar selection
+  };
+
+  const handleSignOut = async () => {
+    await serverSignOut();
+    router.push("/");
   };
 
   return (
@@ -54,19 +62,36 @@ const Nav: React.FC = () => {
               }`}
             >
               {showRules && <RulesRef />}
-            </div>         
+            </div>
           </div>
         )}
-        <form
-            action={serverSignOut}
-          >
-            <button className="bg-red-500 text-white py-2 px-4 rounded-md hover:bg-teal-600"
+        {isRules && ( // Only show the button on the rules page
+          <div className="flex space-x-4">
+            <Link href="/gamepage">
+              <button
+                type="button"
+                className="bg-teal-500 text-white py-2 px-4 rounded-md hover:bg-teal-600"
+              >
+                Start Game
+              </button>
+            </Link>
+            <button
+              type="button"
+              onClick={handleSignOut}
+              className="bg-teal-500 text-white py-2 px-4 rounded-md hover:bg-teal-600"
             >
               Sign out
             </button>
+          </div>
+        )}
+        {!isRules && (
+          <form action={serverSignOut}>
+            <button className="bg-teal-500 text-white py-2 px-4 rounded-md hover:bg-teal-600">
+              Sign out
+            </button>
           </form>
-        </div>
-      
+        )}
+      </div>
     </nav>
   );
 };

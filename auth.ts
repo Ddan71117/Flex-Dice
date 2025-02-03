@@ -1,10 +1,10 @@
-
 import NextAuth from 'next-auth';
 import { authConfig } from './auth.config';
 import Credentials from 'next-auth/providers/credentials';
 import { sql } from '@vercel/postgres';
 import type { User } from './app/lib/definitions';
 import bcrypt from 'bcryptjs';
+import type { AdapterUser } from 'next-auth/adapters';
 import { z } from 'zod';
 
 
@@ -21,7 +21,7 @@ export async function getUser(email: string): Promise<User | undefined> {
   
 } 
 
-export const { auth, signIn, signOut,  } = NextAuth({
+export const { auth, signIn, signOut } = NextAuth({
 ...authConfig,
 
 
