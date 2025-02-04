@@ -11,8 +11,9 @@ import "../globals.css";
 export default function ChatBox() {
   
   const [room, setRoom] = useState("");
+  
   const [rooms, setRooms] = useState<string[]>([]);
-  const [userName, setUserName] = useState("User");
+  const [userName, setUsername] = useState("");
   const [joined, setJoined] = useState(false);
   const [messages, setMessages] = useState<
     { sender: string; message: string }[]
@@ -68,6 +69,12 @@ export default function ChatBox() {
     };
   }, []);
 
+  useEffect(() => {
+  const storedUsername = localStorage.getItem("username");
+  if (storedUsername) {
+  setUsername(storedUsername);
+  }
+  }, []);
   // Join room logic
   const handleJoinRoom = () => {
     if (room && userName) {
@@ -119,11 +126,7 @@ export default function ChatBox() {
     setIsModalOpen(false);
   };
 
-  // Handle userName input and set it
-  const handleUserNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setUserName(e.target.value);
-  };
-
+  
   return (
     <div>
       {/* Button to open the chat modal positioned at the lower-right */}

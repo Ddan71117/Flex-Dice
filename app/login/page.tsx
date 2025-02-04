@@ -28,9 +28,8 @@ const LoginPage: React.FC = () => {
 
     try {
       await authenticate(username, password);
-
-
-      router.push("/game/");
+      localStorage.setItem("username", username); // Store username in local storage
+      router.push("/game");
     } catch (error) {
       setErrorMessage(
         "Failed to log in. Please check your username or password."

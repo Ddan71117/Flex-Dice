@@ -30,6 +30,8 @@ const Nav: React.FC = () => {
       const res = await fetch("/pages/api/logout", { method: "POST" });
       if (res.ok) {
         setIsLoggedIn(false);
+        localStorage.clear();
+
         router.push("/");
       } else {
         console.error("Logout failed:", res.statusText);
