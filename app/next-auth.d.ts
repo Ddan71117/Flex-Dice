@@ -3,6 +3,7 @@
 import NextAuth from "next-auth";
 import { User } from "next-auth";
 import { JWT } from "next-auth/jwt";
+import type { AdapterUser as DefaultAdapterUser } from "@auth/core/adapters";
 
 declare module "next-auth" {
   interface Session {
@@ -22,3 +23,10 @@ declare module "next-auth" {
     username: string;
   }
 }
+
+// declare module "@auth/core/adapters" {
+//   export interface AdapterUser extends DefaultAdapterUser {
+//     id: string;
+//     username: string;
+//   }
+// }

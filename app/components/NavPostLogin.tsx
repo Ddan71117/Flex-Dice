@@ -17,8 +17,8 @@ const Nav: React.FC = () => {
     setIsLoggedIn(loggedInUser);
   }, []);
 
-  const isGamePage = pathname === "/gamepage";
-  const isRules = pathname === "/rules";
+  const isGamePage = pathname === "/game/gamepage";
+  const isRules = pathname === "/game";
 
   const handleAvatarSelection = (avatar: string) => {
     setAvatarSelected(true);
@@ -77,7 +77,7 @@ const Nav: React.FC = () => {
         )}
         {isRules && (
           <div className="flex space-x-4">
-            <Link href="/gamepage">
+            <Link href="/game/gamepage">
               <button
                 type="button"
                 className="bg-teal-500 text-white py-2 px-4 rounded-md hover:bg-teal-600"
