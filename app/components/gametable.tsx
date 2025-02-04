@@ -1,144 +1,134 @@
 'use client';
 import React, { useState, useEffect } from 'react';
-import Game from './gameLogic'; // Adjust the path as necessary
+import Game from './gameLogic';
 
 const PokerTable: React.FC = () => {
-  const { players, gameLog, handleTurn, winner, currentPlayerIndex } = Game();
-  const [currentUserAvatar, setCurrentUserAvatar] = useState<string | undefined>();
-  const [randomNumber, setRandomNumber] = useState<number>(0);
-  const [diceResults, setDiceResults] = useState<string[]>(['.', '.', '.']); // Default dice results (3 dice)
+  const {
+    players,
+    handleTurn,
+    winner,
+    currentPlayerIndex,
+    gameState,
+    setGameState,
+    processResults
+  } = Game();
+  
+  const [displayedDice, setDisplayedDice] = useState<string[]>([]);
 
-  useEffect(() => {
-    const storedAvatar = localStorage.getItem("selectedAvatar");
-    if (storedAvatar) {
-      setCurrentUserAvatar(storedAvatar);
-    }
-  }, []);
-
-  useEffect(() => {
-    setRandomNumber(Math.floor(Math.random() * 5) + 1);
-  }, []);
-
-  // Function to get a random avatar for other players
-  const getRandomAvatar = (playerId: number): string => {
-    return `/images/avatar${randomNumber}.png`; // Adjust the naming convention as necessary
+  const diceImages = {
+    "L": "/images/dice3.png",
+    "R": "/images/dice4.png",
+    "C": "/images/dice2.png",
+    ".": "/images/dice1.png",
   };
 
-  // Function to get the dice image based on the roll result
-  const getDiceImage = (result: string): string | undefined => {
-    switch (result) {
-      case "L":
-        return "/images/dice3.png";  // Ensure these images exist in your public folder
-      case "R":
-        return "/images/dice4.png";
-      case "C":
-        return "/images/dice2.png";
-      case ".":
-        return "/images/dice1.png";
-      default:
-        return "/images/dice1.png";  // Default to empty dice if no result
-    }
+  const startDiceAnimation = () => {
+    let animationFrames = 0;
+    const maxFrames = 30;
+    const currentDiceCount = Math.min(players[currentPlayerIndex].chips, 3);
+    
+    const animate = () => {
+      if (animationFrames >= maxFrames) {
+        const results = players[currentPlayerIndex].diceResult || [];
+        setDisplayedDice(
+          results.map(result => diceImages[result as keyof typeof diceImages])
+        );
+        setGameState(prev => ({ ...prev, isRolling: false, isProcessingResults: true }));
+        processResults(results, currentPlayerIndex);
+        return;
+      }
+
+      const randomDice = Array(currentDiceCount).fill(null).map(() => 
+        diceImages[Object.keys(diceImages)[Math.floor(Math.random() * 4)] as keyof typeof diceImages]
+      );
+      setDisplayedDice(randomDice);
+      animationFrames++;
+      
+      setTimeout(animate, 100);
+    };
+
+    animate();
   };
 
-  // Function to handle the roll and update the dice result in the center
-  const handleNextTurn = () => {
-    handleTurn(); // Call the game logic function for next turn
-    
-    // Safely handle the case where diceResult is null or undefined
-    let currentDiceResults: string[] = [];
-    
-    const diceResult = players[currentPlayerIndex].diceResult;
-  
-    if (diceResult) {
-      // If diceResult is available, split it into an array
-      currentDiceResults = diceResult.split(", ");
-    } else {
-      // If diceResult is null or undefined, provide default results
-      currentDiceResults = ['.', '.', '.'];
+  useEffect(() => {
+    if (gameState.isRolling) {
+      startDiceAnimation();
     }
-  
-    // Ensure the diceResults array has exactly 3 results
-    if (currentDiceResults.length !== 3) {
-      currentDiceResults = ['.', '.', '.'];  // Default to 3 dots if the length is incorrect
-    }
-  
-    // Set the dice results
-    setDiceResults(currentDiceResults);
+  }, [gameState.isRolling]);
+
+  const onTurnClick = () => {
+    handleTurn();
+  };
+
+  const playerPositions = [
+    { top: '5%', left: '50%', transform: '-translate-x-1/2' },
+    { top: '30%', left: '10%' },
+    { top: '70%', left: '10%' },
+    { top: '70%', right: '10%' },
+    { top: '30%', right: '10%' },
+  ];
+
+  const getAvatarImage = (id: number): string => {
+    if (id === 1) return `/images/avatar1.png`;
+    return `https://i.pravatar.cc/100?img=${id + 5}`;
   };
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gray-100">
-      <div className="relative flex justify-center items-center">
-        {/* Poker Table Image */}
-        <img
-          src="/images/poker_table.png"
-          alt="Poker Table"
-          className="w-full max-w-4xl"
+    <div className="fixed inset-0 flex items-center justify-center z-10">
+      <div className="relative w-full max-w-4xl mx-auto mt-16">
+        <img 
+          src="/images/poker_table.png" 
+          alt="Poker Table" 
+          className="w-full"
         />
 
-        {/* Player Positions */}
-        {players.map((player, index) => (
-          <div
-            key={player.id}
-            className={`absolute ${
-              index === 0
-                ? "top-0 left-1/2 transform -translate-x-1/2"
-                : index === 1
-                ? "top-1/2 left-0 transform -translate-y-1/2"
-                : index === 2
-                ? "top-1/2 right-0 transform -translate-y-1/2"
-                : index === 3
-                ? "bottom-0 left-1/4"
-                : index === 4
-                ? "bottom-0 right-1/4"
-                : ""
-            }`}
+        {players.slice(0, 5).map((player, index) => (
+          <div 
+            key={player.id} 
+            className={`absolute ${index === currentPlayerIndex && !gameState.isRolling ? 
+              "border-4 border-yellow-400 p-2 rounded-full animate-pulse ring-4 ring-yellow-500 transition-all duration-500" : ""}`}
+            style={{
+              ...playerPositions[index],
+              transform: playerPositions[index].transform || 'none',
+            }}
           >
-            {/* Player Avatars */}
-            <img
-              src={player.id === 0 ? currentUserAvatar : getRandomAvatar(player.id)}
-              alt={`Player ${player.id}`}
-              className="w-12 h-12 rounded-full"
-            />
-            <p className="text-white">{player.id === 0 ? "You" : `Player ${player.id}`}: {player.chips} chips</p>
+            <div className="flex flex-col items-center">
+              <img 
+                src={getAvatarImage(player.id)} 
+                alt={`Player ${player.id}`} 
+                className="w-16 h-16 rounded-full shadow-lg"
+              />
+              <p className="text-white text-center mt-2">
+                Player {player.id}: {player.chips} chip{player.chips !== 1 ? 's' : ''}
+              </p>
+            </div>
           </div>
         ))}
 
-        {/* Center Player (Center Pot) */}
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-          <img
-            src="https://example.com/center-pot-image.png" // Replace with the actual URL for the center pot image
-            alt="Center Pot"
-            className="w-24 h-24 rounded-full"
-          />
-        </div>
-
-        {/* Dice Results in the Center (Always Show 3 Dice) */}
         <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 flex space-x-4">
-          {diceResults.map((result, index) => (
-            <img
-              key={index}
-              src={getDiceImage(result)}
-              alt={`Dice ${index + 1}`}
-              className="w-12 h-12"
+          {displayedDice.map((dice, index) => (
+            <img 
+              key={index} 
+              src={dice} 
+              alt={`Dice ${index + 1}`} 
+              className={`w-12 h-12 ${gameState.isRolling ? 'animate-bounce' : ''}`}
             />
           ))}
         </div>
 
-        {/* Game Log and Roll Button */}
-        {winner ? (
-          <h2 className="text-white absolute bottom-4 left-1/2 transform -translate-x-1/2 text-xl">
+        {!winner ? (
+          players[currentPlayerIndex].id === 1 && !gameState.isRolling && !gameState.isProcessingResults && (
+            <button 
+              onClick={onTurnClick} 
+              className="absolute bottom-8 left-1/2 transform -translate-x-1/2 px-6 py-3 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
+            >
+              Roll {Math.min(players[currentPlayerIndex].chips, 3)} Dice
+            </button>
+          )
+        ) : (
+          <h2 className="absolute bottom-4 left-1/2 transform -translate-x-1/2 text-xl text-white">
             🎉 Player {winner} wins the game! 🎉
           </h2>
-        ) : (
-          <>
-            <button
-              onClick={handleNextTurn}  // Updated to call handleNextTurn
-              className="absolute bottom-8 left-1/2 transform -translate-x-1/2 px-6 py-3 bg-blue-500 text-white rounded-md"
-            >
-              Next Turn
-            </button>
-          </>
         )}
       </div>
     </div>
