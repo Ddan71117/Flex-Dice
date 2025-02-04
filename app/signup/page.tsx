@@ -15,13 +15,22 @@ const SignUpPage: React.FC = () => {
   const [errorMessage, setErrorMessage] = useState("");
   const [isAnimating, setIsAnimating] = useState(false); // Track animation state
   const [isSignupSuccess, setIsSignupSuccess] = useState(false); // Track signup success
+  const [isFadeOut, setIsFadeOut] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
     setTimeout(() => {
       setIsAnimating(true);
-    }, 50);
+    }, 25);
   }, []);
+
+  const handleFadeOut = (e: React.MouseEvent) => {
+    e.preventDefault(); // Prevent default link behavior
+    setIsFadeOut(true);
+    setTimeout(() => {
+      router.push("/login"); // Navigate after fade-out animation
+    }, 500); // Match this to the animation duration
+  };
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -60,9 +69,11 @@ const SignUpPage: React.FC = () => {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-black-500 to-indigo-500">
       <div
         className={`bg-gray-800 p-6 rounded-lg shadow-md w-full sm:w-96 transform transition-all duration-500 ${
-          isAnimating
-            ? "opacity-100 translate-x-0" // Visible and in place after animation
-            : "opacity-0 translate-x-20" // Start off-screen to the right
+          isFadeOut
+            ? "opacity-0 translate-x-20" // Fade out when navigating
+            : isAnimating
+            ? "opacity-100 translate-x-0" // Normal animation when loaded
+            : "opacity-0 translate-x-20" // Start off-screen for initial animation
         }`}
       >
         <h2 className="text-2xl font-semibold mb-4 text-center text-white">
@@ -158,7 +169,11 @@ const SignUpPage: React.FC = () => {
         </form>
         <p className="text-gray-300 text-sm mt-4">
           Already have an account?{" "}
-          <Link href="/login" className="text-blue-500 hover:underline">
+          <Link
+            href="/login"
+            onClick={handleFadeOut}
+            className="text-blue-500 hover:underline cursor-pointer"
+          >
             Login
           </Link>
         </p>
