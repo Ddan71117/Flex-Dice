@@ -19,7 +19,7 @@ const GamePage: React.FC = () => {
   return (
     <div className="relative min-h-screen bg-transparent">
       <MainDropdown />
-      <PokerTable /> Render PokerTable here
+      <PokerTable /> 
       <ChatBox />
       <GameLog />
       {/* //{" "} */}
