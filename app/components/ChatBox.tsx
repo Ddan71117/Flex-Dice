@@ -13,7 +13,7 @@ export default function ChatBox() {
   const [room, setRoom] = useState("");
   
   const [rooms, setRooms] = useState<string[]>([]);
-  const [userName, setUsername] = useState("");
+  const [userName, setUserName] = useState("");
   const [joined, setJoined] = useState(false);
   const [messages, setMessages] = useState<
     { sender: string; message: string }[]
@@ -72,9 +72,16 @@ export default function ChatBox() {
   useEffect(() => {
   const storedUsername = localStorage.getItem("username");
   if (storedUsername) {
-  setUsername(storedUsername);
+  setUserName(storedUsername);
   }
   }, []);
+
+  // const handleUserNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   const storedUsername = localStorage.getItem("username")
+  //   if (storedUsername)
+  //   setUserName(storedUsername);
+  // };
+  
   // Join room logic
   const handleJoinRoom = () => {
     if (room && userName) {
@@ -148,18 +155,7 @@ export default function ChatBox() {
             {/* If not joined, show room list and userName input */}
             {!joined ? (
               <div className="flex flex-col">
-                {/* User Name Input */}
-                {!userName && (
-                  <div className="mb-4">
-                    <input
-                      type="text"
-                      placeholder="Enter your name"
-                      value={userName}
-                      onChange={handleUserNameChange}
-                      className="w-full px-4 py-2 mb-4 border-2 text-black text-xs placeholder-gray-800 rounded-lg"
-                    />
-                  </div>
-                )}
+               
 
                 {/* Available Rooms */}
                 <div className="mt-2 w-full max-h-[80px] overflow-y-auto">
