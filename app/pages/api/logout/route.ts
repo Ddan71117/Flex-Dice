@@ -6,7 +6,6 @@ export async function POST(request: Request) {
     response.cookies.delete('authjs.session-token');
     response.cookies.delete('authjs.callback-url');
     response.cookies.delete('authjs.session-token');
-
     console.log("User logged out successfully.");
     return response;
   } catch (error) {
