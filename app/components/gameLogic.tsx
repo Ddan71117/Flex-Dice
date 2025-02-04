@@ -5,21 +5,33 @@ import '../globals.css';
 type Player = {
   id: number;
   chips: number;
-  diceResult: string | null; // Add diceResult to each player
-}
+  diceResult: string[] | null;
+};
+
+type GameState = {
+  isRolling: boolean;
+  isProcessingResults: boolean;
+  diceCount: number;
+};
 
 export default function Game() {
   const [players, setPlayers] = useState<Player[]>([
-    { id: 1, chips: 3, diceResult: null }, // You
+    { id: 1, chips: 3, diceResult: null },
     { id: 2, chips: 3, diceResult: null },
     { id: 3, chips: 3, diceResult: null },
     { id: 4, chips: 3, diceResult: null },
-    { id: 5, chips: 3, diceResult: null }, // Player 5
-    { id: 0, chips: 0, diceResult: null }  // Center Pot
+    { id: 5, chips: 3, diceResult: null },
+    { id: 0, chips: 0, diceResult: null }
   ]);
+
   const [currentPlayerIndex, setCurrentPlayerIndex] = useState(0);
   const [gameLog, setGameLog] = useState<string[]>([]);
   const [winner, setWinner] = useState<number | null>(null);
+  const [gameState, setGameState] = useState<GameState>({
+    isRolling: false,
+    isProcessingResults: false,
+    diceCount: 3
+  });
 
   useEffect(() => {
     const activePlayers = players.filter(player => player.id !== 0 && player.chips > 0);
@@ -28,41 +40,34 @@ export default function Game() {
     }
   }, [players]);
 
+  useEffect(() => {
+    if (!gameState.isRolling && !gameState.isProcessingResults && players[currentPlayerIndex].id !== 1) {
+      const timer = setTimeout(() => {
+        handleTurn();
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [currentPlayerIndex, gameState]);
+
   const rollDice = (): string => {
     const outcomes = ['L', 'R', 'C', '.', '.', '.'];
     return outcomes[Math.floor(Math.random() * outcomes.length)];
   };
 
-  const handleTurn = () => {
-    if (winner !== null) return;
-    console.log("Before turn:", players.map(player => `Player ${player.id}: ${player.chips} chips`).join(', '));
+  const processResults = (rolls: string[], playerIndex: number) => {
     const newPlayers = [...players];
-    const player = newPlayers[currentPlayerIndex];
-
-    if (player.chips === 0) {
-      setGameLog((log) => [...log, `Player ${player.id} is out of chips :(`]);
-      nextTurn();
-      return;
-    }
-
-    const rolls: string[] = [];
-    for (let i = 0; i < player.chips && i < 3; i++) {
-      rolls.push(rollDice());
-    }
-
-    // Store the dice result in the player's state
-    newPlayers[currentPlayerIndex].diceResult = rolls.join(', ');
+    const player = newPlayers[playerIndex];
 
     rolls.forEach((roll) => {
       if (roll === 'L') {
-        let leftIndex = (currentPlayerIndex - 1 + players.length) % players.length;
+        let leftIndex = (playerIndex - 1 + players.length) % players.length;
         if (newPlayers[leftIndex].id === 0) {
           leftIndex = (leftIndex - 1 + players.length) % players.length;
         }
         newPlayers[leftIndex].chips++;
         player.chips--;
       } else if (roll === 'R') {
-        let rightIndex = (currentPlayerIndex + 1) % players.length;
+        let rightIndex = (playerIndex + 1) % players.length;
         if (newPlayers[rightIndex].id === 0) {
           rightIndex = (rightIndex + 1) % players.length;
         }
@@ -74,13 +79,44 @@ export default function Game() {
       }
     });
 
-    setGameLog((log) => [
-      ...log,
-      `Player ${player.id} rolled ${rolls.join(', ')}`,
-    ]);
     setPlayers(newPlayers);
-    console.log("After turn:", newPlayers.map(player => `Player ${player.id}: ${player.chips} chips`).join(', '));
-    nextTurn();
+    setGameLog((log) => [...log, `Player ${player.id} rolled ${rolls.join(', ')}`]);
+
+    setTimeout(() => {
+      setGameState(prev => ({ ...prev, isProcessingResults: false }));
+      nextTurn();
+    }, 1000);
+  };
+
+  const handleTurn = () => {
+    if (winner !== null || gameState.isRolling) return;
+
+    const player = players[currentPlayerIndex];
+    if (player.chips === 0) {
+      setGameLog((log) => [...log, `Player ${player.id} is out of chips :(`]);
+      nextTurn();
+      return;
+    }
+
+    // Calculate number of dice based on available chips
+    const diceCount = Math.min(player.chips, 3);
+    const rolls: string[] = [];
+    for (let i = 0; i < diceCount; i++) {
+      rolls.push(rollDice());
+    }
+
+    setGameState({ 
+      isRolling: true, 
+      isProcessingResults: false,
+      diceCount // Store the number of dice being rolled
+    });
+
+    // Store the results but don't process them yet
+    const newPlayers = [...players];
+    newPlayers[currentPlayerIndex].diceResult = rolls;
+    setPlayers(newPlayers);
+
+    return rolls;
   };
 
   const nextTurn = () => {
@@ -93,5 +129,14 @@ export default function Game() {
     });
   };
 
-  return { players, gameLog, handleTurn, winner, currentPlayerIndex };
+  return {
+    players,
+    gameLog,
+    handleTurn,
+    winner,
+    currentPlayerIndex,
+    gameState,
+    setGameState,
+    processResults
+  };
 }
