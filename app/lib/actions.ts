@@ -1,7 +1,8 @@
 "use server";
 import { neon } from "@neondatabase/serverless";
 import bcryptjs from "bcryptjs";
-import NextAuth from '../pages/api/auth/[...nextauth]';
+import { signIn, signOut }  from '../pages/api/auth/[...nextauth]';
+
 
 // Initialize Neon connection
 const sql = neon(process.env.DATABASE_URL || "");
@@ -10,7 +11,7 @@ const sql = neon(process.env.DATABASE_URL || "");
 export async function authenticate(username: string, password: string) {
   try {
     // const user = await getUserByUsername(username);
-    const user = await NextAuth.signIn('credentials', { username, password, redirect: false }) // Use;
+    const user = await signIn('credentials', { username, password, redirect: false }) // Use;
     console.log("User: ", user);
     if (!user) {
       throw new Error("User not found");
@@ -88,7 +89,8 @@ export async function createUser(username: string, password: string) {
 export async function logout(response: any) {
   try {
     // Clear cookies or session
-    response.clearCookie("session_id"); // You may need to adjust based on your session management
+    await signOut({ redirect: false });
+    response.clearCookies('next-auth.session-token'); // You may need to adjust based on your session management
     console.log("User logged out successfully.");
   } catch (error) {
     console.error("Error logging out user:", error);

@@ -6,7 +6,10 @@ import ChatForm from "./ChatForm";
 import ChatMessage from "./ChatMessage";
 import "../globals.css";
 
+
+
 export default function ChatBox() {
+  
   const [room, setRoom] = useState("");
   const [rooms, setRooms] = useState<string[]>([]);
   const [userName, setUserName] = useState("User");

@@ -10,7 +10,7 @@ interface User {
 }
 
 
-export default NextAuth({
+export const { auth, signIn, signOut } =NextAuth({
   providers: [
     CredentialsProvider({
       name: "Credentials",
@@ -55,9 +55,7 @@ export default NextAuth({
       },
     }),
   ],
-  pages: {
-    signIn: "/signin",
-  },
+  
   session: {
     strategy: "jwt",
     maxAge: 30 * 24 * 60 * 60,
@@ -65,15 +63,15 @@ export default NextAuth({
   },
   callbacks: {
     async jwt({ token, user }) {
-      console.log('token1', token);
-      console.log('user1', user);
+      // console.log('token1', token);
+      // console.log('user1', user);
 
       if (user) {
         token.id = user.id;
         token.username = user.username;
       }
-      console.log('token2', token);
-      console.log('user2', user);
+      // console.log('token2', token);
+      // console.log('user2', user);
       return token;
     },
     async session({ session, token }) {
@@ -87,5 +85,6 @@ export default NextAuth({
     },
   },
   
-  secret: process.env.NEXTAUTH_SECRET,
+  secret: process.env.AUTH_SECRET,
 });
+

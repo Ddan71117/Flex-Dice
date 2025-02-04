@@ -30,7 +30,7 @@ const LoginPage: React.FC = () => {
       await authenticate(username, password);
 
 
-      router.push("/rules");
+      router.push("/game/");
     } catch (error) {
       setErrorMessage(
         "Failed to log in. Please check your username or password."
