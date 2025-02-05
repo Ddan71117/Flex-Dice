@@ -1,6 +1,8 @@
-'use client';
-import React, { useState, useEffect } from 'react';
-import Game from './gameLogic';
+"use client";
+import React, { useState, useEffect } from "react";
+import Game from "./gameLogic";
+import { useSession } from "next-auth/react";
+
 
 type PokerTableProps = {
   setGameLog: React.Dispatch<React.SetStateAction<string[]>>;
@@ -11,6 +13,7 @@ const resetGame = () => {
 }
 
 const PokerTable: React.FC<PokerTableProps> = ({ setGameLog }) => {
+  const { data: session } = useSession();
   const {
     user,
     players,
@@ -21,7 +24,33 @@ const PokerTable: React.FC<PokerTableProps> = ({ setGameLog }) => {
     setGameState,
     processResults,
   } = Game(setGameLog);
+
   const [displayedDice, setDisplayedDice] = useState<string[]>([]);
+  const [userAvatar, setUserAvatar] = useState<string>(""); 
+  const [playerAvatars, setPlayerAvatars] = useState<{ [key: number]: string }>({}); 
+
+  const availableAvatars = [
+    '/images/ahsoka.png',
+    '/images/bb8.png',
+    '/images/c3po.png',
+    '/images/darth_maul.png',
+    '/images/orig_yoda.png',
+    '/images/red_sith.png',
+    '/images/han_solo.png',
+    '/images/luke.png',
+  ];
+
+  const avatarNames = {
+    '/images/ahsoka.png': 'Ahsoka',
+    '/images/bb8.png': 'BB8',
+    '/images/c3po.png': 'C3PO',
+    '/images/darth_maul.png': 'Darth Maul',
+    '/images/orig_yoda.png': 'Master Yoda',
+    '/images/red_sith.png': 'Sith Lord',
+    '/images/han_solo.png': 'Han Solo',
+    '/images/luke.png': 'Luke Skywalker',
+  };
+
   const diceImages = {
     L: "/images/dice3.png",
     R: "/images/dice4.png",
@@ -29,13 +58,50 @@ const PokerTable: React.FC<PokerTableProps> = ({ setGameLog }) => {
     "•": "/images/dice1.png",
   };
 
-  const getChipStackImage = (chips: number): string => {
-    if (chips <= 0) return "";
-    if (chips <= 2) return "/images/smCoins.png"; // Low amount
-    if (chips <= 3) return "/images/mdCoins.png"; // Medium amount
-    return "/images/lgCoins.png"; // High amount
+  // Function to get Avatar Image
+  const getAvatarImage = (id: number): string => {
+    if (id === 1 && userAvatar) {
+      return userAvatar; // Player 1 (logged-in user)
+    }
+    return playerAvatars[id] || ""; // Return assigned avatar for other players
   };
 
+  // Setup initial avatars for players
+  useEffect(() => {
+    // Fetch the logged-in user's avatar from localStorage
+    const storedAvatar = localStorage.getItem("selectedAvatar");
+    if (storedAvatar) {
+      setUserAvatar(storedAvatar); // Set logged-in user avatar
+    } else {
+      setUserAvatar("/images/orig_yoda.png"); // Default avatar for player 1
+    }
+
+    // Assign static avatars to other players
+    const avatars: { [key: number]: string } = {};
+    const avatarSet = new Set(availableAvatars);
+    let remainingAvatars = [...availableAvatars];
+
+    // Ensure no duplicate avatars
+    players.forEach((player) => {
+      if (player.id !== 1 && !avatars[player.id]) {
+        // Select a static avatar for non-logged-in players
+        const avatar = remainingAvatars[player.id % remainingAvatars.length];
+        avatars[player.id] = avatar;
+      }
+    });
+
+    setPlayerAvatars(avatars);
+  }, [session, players]);
+
+  // Function to get chip stack image
+  const getChipStackImage = (chips: number): string => {
+    if (chips <= 0) return "";
+    if (chips <= 2) return "/images/smCoins.png";
+    if (chips <= 3) return "/images/mdCoins.png";
+    return "/images/lgCoins.png";
+  };
+
+  // Start dice animation
   const startDiceAnimation = () => {
     let animationFrames = 0;
     const maxFrames = 30;
@@ -54,22 +120,15 @@ const PokerTable: React.FC<PokerTableProps> = ({ setGameLog }) => {
         processResults(results, currentPlayerIndex);
         setGameLog((log) => [
           ...log,
-          `Player ${players[currentPlayerIndex].id} rolled: ${results.join(
-            " "
-          )}`,
+          `Player ${players[currentPlayerIndex].id} rolled: ${results.join(" ")}`,
         ]);
-
         return;
       }
       const randomDice = Array(currentDiceCount)
         .fill(null)
         .map(
           () =>
-            diceImages[
-              Object.keys(diceImages)[
-                Math.floor(Math.random() * 4)
-              ] as keyof typeof diceImages
-            ]
+            diceImages[Object.keys(diceImages)[Math.floor(Math.random() * 4)] as keyof typeof diceImages]
         );
       setDisplayedDice(randomDice);
       animationFrames++;
@@ -84,6 +143,7 @@ const PokerTable: React.FC<PokerTableProps> = ({ setGameLog }) => {
     }
   }, [gameState.isRolling]);
 
+  // Click handler for turning
   const onTurnClick = () => {
     handleTurn();
   };
@@ -96,12 +156,8 @@ const PokerTable: React.FC<PokerTableProps> = ({ setGameLog }) => {
     { top: '30%', left: '10%' },                                   // Player 5 (top left)
   ];
 
-  const getAvatarImage = (id: number): string => {
-    if (id === 1) return `/images/avatar1.png`;
-    return `https://i.pravatar.cc/100?img=${id + 5}`;
-  };
 
-  const centerPot = players.find(p => p.id === 0)?.chips || 0;
+  const centerPot = players.find((p) => p.id === 0)?.chips || 0;
 
   const getPlayerName = (playerId: number) => {
     return playerId === 1 ? "You" : `Player ${playerId}`;
@@ -117,13 +173,13 @@ const PokerTable: React.FC<PokerTableProps> = ({ setGameLog }) => {
         />
 
         {players.slice(0, 5).map((player, index) => (
-          <div 
-            key={player.id} 
-            className={`absolute ${
-              index === currentPlayerIndex && !gameState.isRolling 
-                ? "border-4 border-yellow-400 p-2 rounded-full animate-pulse ring-4 ring-yellow-500 transition-all duration-500" 
+
+          <div
+            key={`${player.id}-${index}`} // Combine player.id and index for a unique key
+            className={`absolute ${index === currentPlayerIndex && !gameState.isRolling
+                ? "border-4 border-yellow-400 p-2 rounded-full animate-pulse ring-4 ring-yellow-500 transition-all duration-500"
                 : ""
-            }`}
+              }`}
             style={{
               ...playerPositions[index],
               transform: playerPositions[index].transform || 'none',
@@ -131,21 +187,31 @@ const PokerTable: React.FC<PokerTableProps> = ({ setGameLog }) => {
           >
             <div className="flex flex-col items-center">
               {player.id === 1 ? (
-                <div className="w-16 h-16 flex items-center justify-center bg-blue-500 text-white font-bold rounded-full shadow-lg border-4 border-white">
-                  YOU
+
+                // 🟢 Differentiate Player 1 (You)
+                <div className="w-12 h-12 flex items-center justify-center bg-blue-500 text-white font-bold rounded-full shadow-lg border-4 border-white">
+                   <img
+                    src={userAvatar}
+                    alt='YOU'
+                    width={85}
+                    height={85}
+                    className="w-16 h-16 rounded-full shadow-lg"
+                  />
                 </div>
               ) : (
                 <div className="relative">
-                  <img 
-                    src={getAvatarImage(player.id)} 
-                    alt={`Player ${player.id}`} 
+                  <img
+                    src={getAvatarImage(player.id)}
+                    alt={`Player ${avatarNames[getAvatarImage(player.id) as keyof typeof avatarNames]}`}
+                    width={85}
+                    height={85}
                     className="w-16 h-16 rounded-full shadow-lg"
                   />
                 </div>
               )}
 
               {player.chips > 0 && (
-                <img 
+                <img
                   src={getChipStackImage(player.chips)}
                   alt={`${player.chips} chips`}
                   className="absolute -bottom-4 -right-4 w-8 h-8"
@@ -154,21 +220,22 @@ const PokerTable: React.FC<PokerTableProps> = ({ setGameLog }) => {
 
               <div className="bg-black bg-opacity-50 px-4 py-2 rounded-full flex items-center space-x-2">
                 <p className={`text-center mt-4 ${player.id === 1 ? "text-blue-400 font-bold" : "text-white"}`}>
-                  {getPlayerName(player.id)}: {player.chips} chip{player.chips !== 1 ? 's' : ''}
+                  {player.id === 1 ? "You" : avatarNames[getAvatarImage(player.id) as keyof typeof avatarNames]} : {player.chips} chip{player.chips !== 1 ? 's' : ''}
                 </p>
               </div>
             </div>
           </div>
         ))}
 
+        {/* Center pot */}
         <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 flex flex-col items-center space-y-4">
           <div className="flex space-x-4">
             {displayedDice.map((dice, index) => (
-              <img 
-                key={index} 
-                src={dice} 
-                alt={`Dice ${index + 1}`} 
-                className={`w-12 h-12 ${gameState.isRolling ? 'animate-bounce' : ''}`}
+              <img
+                key={index}
+                src={dice}
+                alt={`Dice ${index + 1}`}
+                className={`w-12 h-12 ${gameState.isRolling ? "animate-bounce" : ""}`}
               />
             ))}
           </div>
@@ -236,4 +303,6 @@ const PokerTable: React.FC<PokerTableProps> = ({ setGameLog }) => {
   );
 };
 
+
 export default PokerTable;
+
