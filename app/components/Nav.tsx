@@ -4,7 +4,7 @@ import React from "react";
 import { useState, useEffect } from "react";
 import AvatarCarousel from "./AvatarCarousel";
 import { usePathname } from "next/navigation"; // Import usePathname from next/navigation
-import MainDropdown from "./MainDropdown";
+//import MainDropdown from "./MainDropdown";
 
 const Nav: React.FC = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false); // Track login state
