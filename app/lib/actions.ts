@@ -160,11 +160,11 @@ export async function createUser(username: string, password: string) {
 }
 
 // Logout function - to be called server-side
-export async function logout(response: any) {
+export async function logout() {
   try {
     // Clear cookies or session
     await signOut({ redirect: false });
-    response.clearCookies('next-auth.session-token'); // You may need to adjust based on your session management
+    // response.clearCookies('next-auth.session-token'); // You may need to adjust based on your session management
     console.log("User logged out successfully.");
   } catch (error) {
     console.error("Error logging out user:", error);
