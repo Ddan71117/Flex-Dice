@@ -1,10 +1,9 @@
-'use client';
-import { useState, useEffect } from 'react';
-import getSession from '../lib/getSession';
-import { type User } from 'next-auth';
-import '../globals.css';
-import { handleWin, handleLoss } from '../lib/actions';
-
+"use client";
+import { useState, useEffect } from "react";
+import getSession from "../lib/getSession";
+import { type User } from "next-auth";
+import "../globals.css";
+import { handleWin, handleLoss } from "../lib/actions";
 
 type Player = {
   id: number;
@@ -18,36 +17,36 @@ type GameState = {
   diceCount: number;
 };
 
-export default function Game() {
+export default function Game(
+  setGameLog: React.Dispatch<React.SetStateAction<string[]>>
+) {
   const [players, setPlayers] = useState<Player[]>([
     { id: 1, chips: 3, diceResult: null },
     { id: 2, chips: 3, diceResult: null },
     { id: 3, chips: 3, diceResult: null },
     { id: 4, chips: 3, diceResult: null },
     { id: 5, chips: 3, diceResult: null },
-    { id: 0, chips: 0, diceResult: null } // Center pot
+    { id: 0, chips: 0, diceResult: null }, // Center pot
   ]);
-
   const [currentPlayerIndex, setCurrentPlayerIndex] = useState(0);
   const [winner, setWinner] = useState<number | null>(null);
-  const [user, setUser] = useState<User>({username: '', id: ''});
-
+  const [user, setUser] = useState<User>({ username: "", id: "" });
   const [gameState, setGameState] = useState<GameState>({
     isRolling: false,
     isProcessingResults: false,
-    diceCount: 3
+    diceCount: 3,
   });
-const getAuth = async() => {
-      const userData = await getSession()
-      console.log('session user data', userData)
-      if (userData) {
-        setUser(userData)
-      }
-    }
-  useEffect(() => {
-    getAuth()
-  }, [])
 
+  const getAuth = async () => {
+    const userData = await getSession();
+    if (userData) {
+      setUser(userData);
+    }
+  };
+
+  useEffect(() => {
+    getAuth();
+  }, []);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -55,7 +54,11 @@ const getAuth = async() => {
       if (userData) {
         setPlayers((prevPlayers) => {
           const updatedPlayers = [...prevPlayers];
-          updatedPlayers[0] = { id: parseInt(userData.id), chips: 3, diceResult: null };
+          updatedPlayers[0] = {
+            id: parseInt(userData.id),
+            chips: 3,
+            diceResult: null,
+          };
           return updatedPlayers;
         });
       }
@@ -63,48 +66,49 @@ const getAuth = async() => {
     fetchUser();
   }, []);
 
-  useEffect(() =>{
-    if (user)  {
-    let id = user?.id?.toString() || ''
-    if (winner?.toString() !== id && winner !== null) {
-      console.log('you lost!')
-      console.log(winner)
-      if (user.id) {
-        console.log(parseInt(user.id));
-        handleLoss(parseInt(user.id));
+  useEffect(() => {
+    if (user) {
+      let id = user?.id?.toString() || "";
+      if (winner?.toString() !== id && winner !== null) {
+        console.log("you lost!");
+        console.log(winner);
+
+        if (user.id) {
+          console.log(parseInt(user.id));
+          handleLoss(parseInt(user.id));
+        }
       }
     }
-  }
-  },[winner])
+  }, [winner]);
 
-  useEffect(() =>{
-    if (user)  {
-    let id = user?.id?.toString() || ''
-    if (winner?.toString() === id && winner !== null) {
-      console.log('you win!')
-      console.log(winner)
-      if (user.id) {
-        console.log(parseInt(user.id));
-        handleWin(parseInt(user.id));
+  useEffect(() => {
+    if (user) {
+      let id = user?.id?.toString() || "";
+      if (winner?.toString() === id && winner !== null) {
+        console.log("you win!");
+        console.log(winner);
+        if (user.id) {
+          console.log(parseInt(user.id));
+          handleWin(parseInt(user.id));
+        }
       }
-      
     }
-  }
-  },[winner])
-
+  }, [winner]);
 
   // Check for winner and distribute center pot
   useEffect(() => {
     if (winner === null) {
-      const activePlayers = players.filter(player => player.id !== 0 && player.chips > 0);
+      const activePlayers = players.filter(
+        (player) => player.id !== 0 && player.chips > 0
+      );
       if (activePlayers.length === 1) {
         const winningPlayer = activePlayers[0];
-        const centerPot = players.find(p => p.id === 0)?.chips || 0;
+        const centerPot = players.find((p) => p.id === 0)?.chips || 0;
         setWinner(winningPlayer.id);
-        
+
         if (centerPot > 0) {
-          setPlayers(prevPlayers => 
-            prevPlayers.map(player => {
+          setPlayers((prevPlayers) =>
+            prevPlayers.map((player) => {
               if (player.id === winningPlayer.id) {
                 return { ...player, chips: player.chips + centerPot };
               }
@@ -120,7 +124,11 @@ const getAuth = async() => {
   }, [players, winner]);
 
   useEffect(() => {
-    if (!gameState.isRolling && !gameState.isProcessingResults && players[currentPlayerIndex].id !== players[0].id ) {
+    if (
+      !gameState.isRolling &&
+      !gameState.isProcessingResults &&
+      players[currentPlayerIndex].id !== players[0].id
+    ) {
       const timer = setTimeout(() => {
         handleTurn();
       }, 1000);
@@ -129,7 +137,7 @@ const getAuth = async() => {
   }, [currentPlayerIndex, gameState]);
 
   const rollDice = (): string => {
-    const outcomes = ['L', 'R', 'C', '.', '.', '.'];
+    const outcomes = ["L", "R", "C", "•", "•", "•"];
     return outcomes[Math.floor(Math.random() * outcomes.length)];
   };
 
@@ -138,31 +146,41 @@ const getAuth = async() => {
     const player = newPlayers[playerIndex];
 
     rolls.forEach((roll) => {
-      if (roll === 'L') {
+      if (roll === "L") {
         let leftIndex = (playerIndex - 1 + players.length) % players.length;
         if (newPlayers[leftIndex].id === 0) {
           leftIndex = (leftIndex - 1 + players.length) % players.length;
         }
         newPlayers[leftIndex].chips++;
         player.chips--;
-      } else if (roll === 'R') {
+        setGameLog((log) => [
+          ...log,
+          `-Player ${player.id} passed 1 chip to Player ${newPlayers[leftIndex].id}`,
+        ]);
+      } else if (roll === "R") {
         let rightIndex = (playerIndex + 1) % players.length;
         if (newPlayers[rightIndex].id === 0) {
           rightIndex = (rightIndex + 1) % players.length;
         }
         newPlayers[rightIndex].chips++;
         player.chips--;
-      } else if (roll === 'C') {
-        newPlayers.find(p => p.id === 0)!.chips++;
+        setGameLog((log) => [
+          ...log,
+          `-Player ${player.id} passed 1 chip to Player ${newPlayers[rightIndex].id}`,
+        ]);
+      } else if (roll === "C") {
+        newPlayers.find((p) => p.id === 0)!.chips++;
         player.chips--;
+        setGameLog((log) => [
+          ...log,
+          `-Player ${player.id} added 1 chip to the center`,
+        ]);
       }
     });
 
     setPlayers(newPlayers);
-
     setTimeout(() => {
-      setGameState(prev => ({ ...prev, isProcessingResults: false }));
-
+      setGameState((prev) => ({ ...prev, isProcessingResults: false }));
       nextTurn();
     }, 1000);
   };
@@ -171,8 +189,9 @@ const getAuth = async() => {
     if (winner !== null || gameState.isRolling) return;
 
     const player = players[currentPlayerIndex];
-    
+
     if (player.chips === 0) {
+      setGameLog((log) => [...log, `-Player ${player.id} is out of chips :(`]);
       nextTurn();
       return;
     }
@@ -183,17 +202,22 @@ const getAuth = async() => {
       rolls.push(rollDice());
     }
 
-    setGameState({ 
-      isRolling: true, 
+    setGameState({
+      isRolling: true,
       isProcessingResults: false,
-      diceCount
+      diceCount,
     });
 
     const newPlayers = [...players];
     newPlayers[currentPlayerIndex].diceResult = rolls;
     setPlayers(newPlayers);
-    return rolls;
 
+    setGameLog((log) => [
+      ...log,
+      `-Player ${player.id} rolled: ${rolls.join(", ")}`,
+    ]);
+
+    return rolls;
   };
 
   const nextTurn = () => {
@@ -214,6 +238,6 @@ const getAuth = async() => {
     gameState,
     setGameState,
     processResults,
-    user
+    user,
   };
 }

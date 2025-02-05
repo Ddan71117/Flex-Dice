@@ -5,9 +5,9 @@ import GameLog from "../../components/GameLog";
 import MainDropdown from "../../components/MainDropdown";
 import PokerTable from "../../components/gametable"; // Import PokerTable
 
-
 const GamePage: React.FC = () => {
   const [selectedAvatar, setSelectedAvatar] = useState<string | null>(null);
+  const [gameLog, setGameLog] = useState<string[]>([]);
 
   useEffect(() => {
     // Retrieve avatar from localStorage on page load
@@ -20,10 +20,9 @@ const GamePage: React.FC = () => {
   return (
     <div className="relative min-h-screen bg-transparent">
       <MainDropdown />
-      <PokerTable /> 
+      <PokerTable setGameLog={setGameLog} />
       <ChatBox />
-      <GameLog />
-      {/* //{" "} */}
+      <GameLog gameLog={gameLog} />
     </div>
   );
 };
