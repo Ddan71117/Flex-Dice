@@ -4,6 +4,7 @@ import Game from './gameLogic';
 
 const PokerTable: React.FC = () => {
   const {
+    user,
     players,
     handleTurn,
     winner,
@@ -149,7 +150,7 @@ const PokerTable: React.FC = () => {
         </div>
 
         {!winner ? (
-          players[currentPlayerIndex].id === 1 && !gameState.isRolling && !gameState.isProcessingResults && (
+          players[currentPlayerIndex].id === parseInt(user.id || '0') &&  !gameState.isRolling && !gameState.isProcessingResults && (
             <button 
               onClick={onTurnClick} 
               className="absolute bottom-8 left-1/2 transform -translate-x-1/2 px-6 py-3 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"

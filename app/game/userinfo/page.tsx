@@ -8,7 +8,9 @@ export default async function userInfoPage() {
     const SignedIn = ({ user }: { user: User }) => {
         console.log('user', user)
         console.log('username', user.username)
-        return <div>Welcome, {user.username}</div>
+        console.log('username', user.id)
+        return <div>Welcome, {user.username}, {user.id} </div>
+                
     }
 
     return (

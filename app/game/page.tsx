@@ -1,14 +1,35 @@
 "use client";
 import dynamic from "next/dynamic";
+import GameStats from '../components/gameStats';
+import { initializeApp } from '../lib/actions';
+import { useEffect } from "react";
+import getSession from '../lib/getSession';
 
 const Rules = () => {
   const VideoPlayer = dynamic(() => import("../components/VideoPlayer"), {
     ssr: false,
   });
+  const getAuth = async() => {
+        const userData = await getSession()
+        console.log('session user data', userData)
+
+  }
+  useEffect(() => {
+    getAuth() 
+  }, [])
+
+  useEffect(() => {
+    const initialize = async () => {
+      await initializeApp();
+    }
+    initialize()
+  }, [])
+
 
   return (
     <div className="min-h-screen flex items-center justify-center">
       <VideoPlayer url="https://www.youtube.com/watch?v=OxxpTWk3Rx0&t=21s" />
+      <GameStats />
     </div>
     // <div className="flex justify-center items-center min-h-screen">
     //   <div className="bg-white p-8 mt-24 rounded-xl shadow-xl max-w-4xl">
