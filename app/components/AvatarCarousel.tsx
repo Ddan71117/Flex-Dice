@@ -35,7 +35,10 @@ const AvatarCarousel: React.FC<AvatarCarouselProps> = ({ onSelectAvatar }) => {
 
   return (
     <div className="avatar-carousel flex items-center justify-center space-x-4">
-      <button onClick={prevAvatar} className="px-4 py-2 bg-black-300 rounded">
+      <button
+        onClick={prevAvatar}
+        className="px-4 py-2 bg-black-300 text-white rounded"
+      >
         Prev
       </button>
 
@@ -49,7 +52,10 @@ const AvatarCarousel: React.FC<AvatarCarouselProps> = ({ onSelectAvatar }) => {
         />
       </div>
 
-      <button onClick={nextAvatar} className="px-4 py-2 bg-black-300 rounded">
+      <button
+        onClick={nextAvatar}
+        className="px-4 py-2 bg-black-300 text-white rounded"
+      >
         Next
       </button>
     </div>

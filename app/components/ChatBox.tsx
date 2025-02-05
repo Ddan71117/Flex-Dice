@@ -6,12 +6,9 @@ import ChatForm from "./ChatForm";
 import ChatMessage from "./ChatMessage";
 import "../globals.css";
 
-
-
 export default function ChatBox() {
-  
   const [room, setRoom] = useState("");
-  
+
   const [rooms, setRooms] = useState<string[]>([]);
   const [userName, setUserName] = useState("");
   const [joined, setJoined] = useState(false);
@@ -19,8 +16,6 @@ export default function ChatBox() {
     { sender: string; message: string }[]
   >([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
-
-
 
   // fetchUser();  // Fetch user data when component mounts
 
@@ -50,10 +45,10 @@ export default function ChatBox() {
   }, []);
 
   useEffect(() => {
-  const storedUsername = localStorage.getItem("username");
-  if (storedUsername) {
-  setUserName(storedUsername);
-  }
+    const storedUsername = localStorage.getItem("username");
+    if (storedUsername) {
+      setUserName(storedUsername);
+    }
   }, []);
 
   // Join room logic
@@ -107,7 +102,6 @@ export default function ChatBox() {
     setIsModalOpen(false);
   };
 
-  
   return (
     <div>
       {/* Button to open the chat modal positioned at the lower-right */}
@@ -122,15 +116,13 @@ export default function ChatBox() {
       {isModalOpen && (
         <div className="fixed bottom-4 left-4 w-50 max-w-3xl mx-auto p-4 bg-gray-800 border rounded-lg">
           <div className="bg-gray-800 p-6 rounded-lg w-80 sm:w-96 max-w-sm mx-auto">
-            <h3 className="text-2xl font-bold text-white">
+            <h3 className="text-2xl font-bold text-white text-center mb-2">
               Welcome {userName || "Guest"}!
             </h3>
 
             {/* If not joined, show room list and userName input */}
             {!joined ? (
               <div className="flex flex-col">
-               
-
                 {/* Available Rooms */}
                 <div className="mt-2 w-full max-h-[80px] overflow-y-auto">
                   <h2 className="mt-2 font-bold text-white text-sm">
@@ -214,7 +206,7 @@ export default function ChatBox() {
 
             {/* Close Modal Button */}
             <button
-              className="mt-4 bg-red-500 text-white p-2 rounded-lg"
+              className="mt-4 bg-red-500 text-white px-4 py-2 rounded-lg w-full"
               onClick={closeModal}
             >
               Close
