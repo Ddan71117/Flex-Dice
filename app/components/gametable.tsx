@@ -39,17 +39,6 @@ const PokerTable: React.FC<PokerTableProps> = ({ setGameLog }) => {
     '/images/luke.png',
   ];
 
-  const avatarNames = {
-    '/images/ahsoka.png': 'Ahsoka',
-    '/images/bb8.png': 'BB8',
-    '/images/c3po.png': 'C3PO',
-    '/images/darth_maul.png': 'Darth Maul',
-    '/images/orig_yoda.png': 'Master Yoda',
-    '/images/red_sith.png': 'Sith Lord',
-    '/images/han_solo.png': 'Han Solo',
-    '/images/luke.png': 'Luke Skywalker',
-  };
-
   const diceImages: { [key: string]: string } = {
     'L': "/images/dice3.png",
     'R': "/images/dice4.png",
@@ -63,7 +52,7 @@ const PokerTable: React.FC<PokerTableProps> = ({ setGameLog }) => {
   };
 
   const getAvatarImage = (id: number): string => {
-    if (id === 1 && userAvatar) {
+    if (id === parseInt(user.id || "0") && userAvatar) {
       return userAvatar;
     }
     return playerAvatars[id];
@@ -81,14 +70,14 @@ const PokerTable: React.FC<PokerTableProps> = ({ setGameLog }) => {
     const remainingAvatars = [...availableAvatars];
 
     players.forEach((player) => {
-      if (player.id !== 1 && !avatars[player.id]) {
+      if (player.id !== parseInt(user.id || "0") && !avatars[player.id]) {
         const avatar = remainingAvatars[player.id % remainingAvatars.length];
         avatars[player.id] = avatar;
       }
     });
 
     setPlayerAvatars(avatars);
-  }, [session, players]);
+  }, [session, players, user.id]);
 
   const getChipStackImage = (chips: number): string => {
     if (chips <= 0) return "";
@@ -156,6 +145,14 @@ const PokerTable: React.FC<PokerTableProps> = ({ setGameLog }) => {
 
   const centerPot = players.find((p) => p.id === 0)?.chips || 0;
 
+  const getWinnerMessage = () => {
+    const isUserWinner = parseInt(user.id || "0") === winner;
+    return {
+      title: isUserWinner ? "You Win!" : `Player ${winner} Wins!`,
+      subtitle: isUserWinner ? "Test your luck one more time?" : "Better luck next time!"
+    };
+  };
+
   return (
     <div className="fixed inset-0 flex items-center justify-center mt-20">
       <div className="relative w-full max-w-4xl mx-auto mt-16">
@@ -178,7 +175,7 @@ const PokerTable: React.FC<PokerTableProps> = ({ setGameLog }) => {
             }}
           >
             <div className="flex flex-col items-center">
-              {player.id === 1 ? (
+              {player.id === parseInt(user.id || "0") ? (
                 <div className="w-12 h-12 flex items-center justify-center bg-blue-500 text-white font-bold rounded-full shadow-lg border-4 border-white">
                    <img
                     src={userAvatar}
@@ -192,7 +189,7 @@ const PokerTable: React.FC<PokerTableProps> = ({ setGameLog }) => {
                 <div className="relative">
                   <img
                     src={getAvatarImage(player.id)}
-                    alt={`Player ${avatarNames[getAvatarImage(player.id) as keyof typeof avatarNames]}`}
+                    alt={`Player ${player.id}`}
                     width={85}
                     height={85}
                     className="w-16 h-16 rounded-full shadow-lg"
@@ -209,8 +206,8 @@ const PokerTable: React.FC<PokerTableProps> = ({ setGameLog }) => {
               )}
 
               <div className="bg-black bg-opacity-50 px-4 py-2 rounded-full flex items-center space-x-2">
-                <p className={`text-center mt-4 ${player.id === 1 ? "text-blue-400 font-bold" : "text-white"}`}>
-                  {player.id === 1 ? "You" : avatarNames[getAvatarImage(player.id) as keyof typeof avatarNames]} : {player.chips} chip{player.chips !== 1 ? 's' : ''}
+                <p className={`text-center mt-4 ${player.id === parseInt(user.id || "0") ? "text-blue-400 font-bold" : "text-white"}`}>
+                  {player.id === parseInt(user.id || "0") ? user.username || "You" : `Player ${player.id}`} : {player.chips} chip{player.chips !== 1 ? 's' : ''}
                 </p>
               </div>
             </div>
@@ -268,10 +265,10 @@ const PokerTable: React.FC<PokerTableProps> = ({ setGameLog }) => {
             <div className="bg-black bg-opacity-75 px-8 py-4 rounded-xl shadow-2xl flex flex-col items-center space-y-4">
               <div className="transform animate-bounce">
                 <h2 className="text-2xl text-white font-bold text-center">
-                  🎉 {winner === 1 ? "You Win!" : `Player ${winner} Wins!`} 🎉
+                  🎉 {getWinnerMessage().title} 🎉
                 </h2>
                 <p className="text-gold text-center mt-2 text-yellow-400">
-                  {winner === 1 ? "Congratulations on your victory!" : "Better luck next time!"}
+                  {getWinnerMessage().subtitle}
                 </p>
               </div>
               <button
