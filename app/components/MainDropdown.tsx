@@ -76,79 +76,16 @@ const MainDropdown: React.FC = () => {
 
   return (
     <div className="fixed left-1/2 transform -translate-x-1/2 z-40 flex items-center space-x-3">
-      <button
-        type="button"
-        className="avatar-btn flex text-sm bg-gray-800 rounded-full ring-2 ring-red-300 dark:ring-red-500 focus:outline-none hover:ring-4 hover:ring-blue-800"
-        onClick={toggleDropdown}
-      >
-        <span className="sr-only">Open user menu</span>
-
-        {/* If logged in and avatar selected, show the avatar */}
-        {isLoggedIn && selectedAvatar ? (
-          <img
-            className="w-32 h-32 rounded-full "
-            src={selectedAvatar}
-            alt="User Avatar"
-            width={48}
-            height={48}
-          />
-        ) : (
-          /* Show DiceCluster only if logged out */
-          !isLoggedIn
-        )}
-      </button>
-
-      {isDropdownOpen && (
-        <div className="dropdown absolute left-10 top-16 z-50 mt-2 w-48 bg-white divide-y divide-gray-100 rounded-lg shadow-sm dark:bg-gray-700 dark:divide-gray-600">
-          {isLoggedIn ? (
-            <div className="px-4 py-3">
-              <span className="block text-sm text-gray-900 dark:text-white">
-                {localStorage.getItem("userName") || "UserNameHere"}
-              </span>
-              <span className="block text-sm text-gray-500 truncate dark:text-gray-400">
-                {localStorage.getItem("userEmail") || "test@gmail.com"}
-              </span>
-            </div>
-          ) : (
-            <ul className="py-2">
-              <li>
-                <Link
-                  href="/"
-                  className="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-500 dark:text-gray-200 dark:hover:bg-blue-600"
-                >
-                  Login
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/signup"
-                  className="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-500 dark:text-gray-200 dark:hover:bg-green-600"
-                >
-                  Signup
-                </Link>
-              </li>
-            </ul>
-          )}
-
-          <form action={logout}>
-            <button
-              onClick={handleLogout} // Handle logout
-              className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white"
-            >
-              Sign out
-            </button>
-          </form>
-        </div>
-      )}
-
-      {/* Always show AvatarCarousel when logged in and no avatar selected */}
-      {isLoggedIn && !selectedAvatar && (
-        <div className="absolute top-16 left-10 mt-2 z-50">
-          <AvatarCarousel onSelectAvatar={setSelectedAvatar} />
-        </div>
+      {isLoggedIn && selectedAvatar && (
+        <img
+          className="w-32 h-32 rounded-full ring-2 ring-blue-300 dark:ring-red-500 shadow-lg"
+          src={selectedAvatar}
+          alt="User Avatar"
+          width={48}
+          height={48}
+        />
       )}
     </div>
-  );
-};
+  )};
 
-export default MainDropdown;
+  export default MainDropdown;

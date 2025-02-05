@@ -5,6 +5,7 @@ import { type User } from 'next-auth';
 import '../globals.css';
 import { handleWin, handleLoss } from '../lib/actions';
 
+
 type Player = {
   id: number;
   chips: number;
@@ -24,11 +25,10 @@ export default function Game() {
     { id: 3, chips: 3, diceResult: null },
     { id: 4, chips: 3, diceResult: null },
     { id: 5, chips: 3, diceResult: null },
-    { id: 0, chips: 0, diceResult: null }
+    { id: 0, chips: 0, diceResult: null } // Center pot
   ]);
 
   const [currentPlayerIndex, setCurrentPlayerIndex] = useState(0);
-  const [gameLog, setGameLog] = useState<string[]>([]);
   const [winner, setWinner] = useState<number | null>(null);
   const [user, setUser] = useState<User>({username: '', id: ''});
 
@@ -93,12 +93,31 @@ const getAuth = async() => {
   },[winner])
 
 
+  // Check for winner and distribute center pot
   useEffect(() => {
-    const activePlayers = players.filter(player => player.id !== 0 && player.chips > 0);
-    if (activePlayers.length === 1) {
-      setWinner(activePlayers[0].id);
+    if (winner === null) {
+      const activePlayers = players.filter(player => player.id !== 0 && player.chips > 0);
+      if (activePlayers.length === 1) {
+        const winningPlayer = activePlayers[0];
+        const centerPot = players.find(p => p.id === 0)?.chips || 0;
+        setWinner(winningPlayer.id);
+        
+        if (centerPot > 0) {
+          setPlayers(prevPlayers => 
+            prevPlayers.map(player => {
+              if (player.id === winningPlayer.id) {
+                return { ...player, chips: player.chips + centerPot };
+              }
+              if (player.id === 0) {
+                return { ...player, chips: 0 };
+              }
+              return player;
+            })
+          );
+        }
+      }
     }
-  }, [players]);
+  }, [players, winner]);
 
   useEffect(() => {
     if (!gameState.isRolling && !gameState.isProcessingResults && players[currentPlayerIndex].id !== players[0].id ) {
@@ -140,7 +159,6 @@ const getAuth = async() => {
     });
 
     setPlayers(newPlayers);
-    setGameLog((log) => [...log, `Player ${player.id} rolled ${rolls.join(', ')}`]);
 
     setTimeout(() => {
       setGameState(prev => ({ ...prev, isProcessingResults: false }));
@@ -155,12 +173,10 @@ const getAuth = async() => {
     const player = players[currentPlayerIndex];
     
     if (player.chips === 0) {
-      setGameLog((log) => [...log, `Player ${player.id} is out of chips :(`]);
       nextTurn();
       return;
     }
 
-    // Calculate number of dice based on available chips
     const diceCount = Math.min(player.chips, 3);
     const rolls: string[] = [];
     for (let i = 0; i < diceCount; i++) {
@@ -170,22 +186,20 @@ const getAuth = async() => {
     setGameState({ 
       isRolling: true, 
       isProcessingResults: false,
-      diceCount // Store the number of dice being rolled
+      diceCount
     });
 
-    // Store the results but don't process them yet
     const newPlayers = [...players];
     newPlayers[currentPlayerIndex].diceResult = rolls;
     setPlayers(newPlayers);
-
-
     return rolls;
+
   };
 
   const nextTurn = () => {
     setCurrentPlayerIndex((prev) => {
       let nextIndex = (prev + 1) % players.length;
-      while (players[nextIndex].id === 0) {
+      while (players[nextIndex].id === 0 || players[nextIndex].chips === 0) {
         nextIndex = (nextIndex + 1) % players.length;
       }
       return nextIndex;
@@ -194,7 +208,6 @@ const getAuth = async() => {
 
   return {
     players,
-    gameLog,
     handleTurn,
     winner,
     currentPlayerIndex,

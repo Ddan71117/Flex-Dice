@@ -23,6 +23,13 @@ const PokerTable: React.FC = () => {
     ".": "/images/dice1.png",
   };
 
+  const getChipStackImage = (chips: number): string => {
+    if (chips <= 0) return '';
+    if (chips <= 2) return '/images/smCoins.png'; // Low amount
+    if (chips <= 3) return '/images/mdCoins.png'; // Medium amount
+    return '/images/lgCoins.png'; // High amount
+  };
+
   const startDiceAnimation = () => {
     let animationFrames = 0;
     const maxFrames = 30;
@@ -62,7 +69,7 @@ const PokerTable: React.FC = () => {
   };
 
   const playerPositions = [
-    { top: '5%', left: '50%', transform: '-translate-x-1/2' },
+    { top: '5%', left: '40%', transform: '-translate-x-1/2' },
     { top: '30%', left: '10%' },
     { top: '70%', left: '10%' },
     { top: '70%', right: '10%' },
@@ -74,8 +81,10 @@ const PokerTable: React.FC = () => {
     return `https://i.pravatar.cc/100?img=${id + 5}`;
   };
 
+  const centerPot = players.find(p => p.id === 0)?.chips || 0;
+
   return (
-    <div className="flex items-center justify-center">
+    <div className="fixed inset-0 flex items-center justify-center mt-20">
       <div className="relative w-full max-w-4xl mx-auto mt-16">
         <img 
           src="/images/poker_table.png" 
@@ -94,27 +103,50 @@ const PokerTable: React.FC = () => {
             }}
           >
             <div className="flex flex-col items-center">
-              <img 
-                src={getAvatarImage(player.id)} 
-                alt={`Player ${player.id}`} 
-                className="w-16 h-16 rounded-full shadow-lg"
-              />
-              <p className="text-white text-center mt-2">
+              <div className="relative">
+                <img 
+                  src={getAvatarImage(player.id)} 
+                  alt={`Player ${player.id}`} 
+                  className="w-16 h-16 rounded-full shadow-lg"
+                />
+                {player.chips > 0 && (
+                  <img 
+                    src={getChipStackImage(player.chips)}
+                    alt={`${player.chips} chips`}
+                    className="absolute -bottom-4 -right-4 w-8 h-8"
+                  />
+                )}
+              </div>
+              <p className="text-white text-center mt-4">
                 Player {player.id}: {player.chips} chip{player.chips !== 1 ? 's' : ''}
               </p>
             </div>
           </div>
         ))}
 
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 flex space-x-4">
-          {displayedDice.map((dice, index) => (
-            <img 
-              key={index} 
-              src={dice} 
-              alt={`Dice ${index + 1}`} 
-              className={`w-12 h-12 ${gameState.isRolling ? 'animate-bounce' : ''}`}
-            />
-          ))}
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 flex flex-col items-center space-y-4">
+          <div className="flex space-x-4">
+            {displayedDice.map((dice, index) => (
+              <img 
+                key={index} 
+                src={dice} 
+                alt={`Dice ${index + 1}`} 
+                className={`w-12 h-12 ${gameState.isRolling ? 'animate-bounce' : ''}`}
+              />
+            ))}
+          </div>
+          {centerPot > 0 && (
+            <div className="bg-black bg-opacity-50 px-4 py-2 rounded-full flex items-center space-x-2">
+              <img 
+                src={getChipStackImage(centerPot)}
+                alt={`${centerPot} chips`}
+                className="w-6 h-6"
+              />
+              <p className="text-white font-bold text-lg">
+                Center Pot: {centerPot} chip{centerPot !== 1 ? 's' : ''}
+              </p>
+            </div>
+          )}
         </div>
 
         {!winner ? (

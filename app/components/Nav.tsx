@@ -4,7 +4,7 @@ import React from "react";
 import { useState, useEffect } from "react";
 import AvatarCarousel from "./AvatarCarousel";
 import { usePathname } from "next/navigation"; // Import usePathname from next/navigation
-import MainDropdown from "./MainDropdown";
+//import MainDropdown from "./MainDropdown";
 
 const Nav: React.FC = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false); // Track login state
@@ -30,9 +30,11 @@ const Nav: React.FC = () => {
   };
 
   return (
-    <nav className="fixed w-full bg-gray-gradient bg-[length:400%_400%] animate-gradient text-white flex justify-center items-center z-30">
-      <div className="text-5xl font-semibold text-center p-4 ">Flex-Dice</div>
-    </nav>
+    <nav className="fixed left-0 w-full z-50 bg-gray-gradient bg-[length:400%_400%] animate-gradient text-white flex justify-center items-center">
+      <div className="text-5xl font-semibold text-center p-4">
+        <img src="./images/FLEXDICE.png" className="w-48 h-auto" alt="FlexDice Logo" />
+      </div>
+</nav>
   );
 };
 

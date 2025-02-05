@@ -20,7 +20,8 @@ const GamePage: React.FC = () => {
   return (
     <div className="relative min-h-screen bg-transparent">
       <MainDropdown />
-      <PokerTable/> 
+      <PokerTable /> 
+      <ChatBox />
       <GameLog />
       {/* //{" "} */}
     </div>
