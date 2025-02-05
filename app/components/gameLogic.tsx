@@ -18,7 +18,7 @@ type GameState = {
   diceCount: number;
 };
 
-export default function Game() {
+export default function Game(setGameLog: React.Dispatch<React.SetStateAction<string[]>>) {
   const [players, setPlayers] = useState<Player[]>([
     { id: 1, chips: 3, diceResult: null },  // Top (You)
     { id: 2, chips: 3, diceResult: null },  // Top Right

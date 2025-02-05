@@ -2,10 +2,15 @@
 import React, { useState, useEffect } from 'react';
 import Game from './gameLogic';
 
-const PokerTable: React.FC = () => {
-  const resetGame = () => {
-    window.location.reload();
-  };
+type PokerTableProps = {
+  setGameLog: React.Dispatch<React.SetStateAction<string[]>>;
+};
+
+const resetGame = () => {
+  window.location.reload();
+}
+
+const PokerTable: React.FC<PokerTableProps> = ({ setGameLog }) => {
   const {
     user,
     players,
@@ -14,50 +19,62 @@ const PokerTable: React.FC = () => {
     currentPlayerIndex,
     gameState,
     setGameState,
-    processResults
-  } = Game();
-  
+    processResults,
+  } = Game(setGameLog);
   const [displayedDice, setDisplayedDice] = useState<string[]>([]);
-
   const diceImages = {
-    "L": "/images/dice3.png",
-    "R": "/images/dice4.png",
-    "C": "/images/dice2.png",
-    ".": "/images/dice1.png",
+    L: "/images/dice3.png",
+    R: "/images/dice4.png",
+    C: "/images/dice2.png",
+    "•": "/images/dice1.png",
   };
 
   const getChipStackImage = (chips: number): string => {
-    if (chips <= 0) return '';
-    if (chips <= 2) return '/images/smCoins.png';
-    if (chips <= 3) return '/images/mdCoins.png';
-    return '/images/lgCoins.png';
+    if (chips <= 0) return "";
+    if (chips <= 2) return "/images/smCoins.png"; // Low amount
+    if (chips <= 3) return "/images/mdCoins.png"; // Medium amount
+    return "/images/lgCoins.png"; // High amount
   };
 
   const startDiceAnimation = () => {
     let animationFrames = 0;
     const maxFrames = 30;
     const currentDiceCount = Math.min(players[currentPlayerIndex].chips, 3);
-    
     const animate = () => {
       if (animationFrames >= maxFrames) {
         const results = players[currentPlayerIndex].diceResult || [];
         setDisplayedDice(
-          results.map(result => diceImages[result as keyof typeof diceImages])
+          results.map((result) => diceImages[result as keyof typeof diceImages])
         );
-        setGameState(prev => ({ ...prev, isRolling: false, isProcessingResults: true }));
+        setGameState((prev) => ({
+          ...prev,
+          isRolling: false,
+          isProcessingResults: true,
+        }));
         processResults(results, currentPlayerIndex);
+        setGameLog((log) => [
+          ...log,
+          `Player ${players[currentPlayerIndex].id} rolled: ${results.join(
+            " "
+          )}`,
+        ]);
+
         return;
       }
-
-      const randomDice = Array(currentDiceCount).fill(null).map(() => 
-        diceImages[Object.keys(diceImages)[Math.floor(Math.random() * 4)] as keyof typeof diceImages]
-      );
+      const randomDice = Array(currentDiceCount)
+        .fill(null)
+        .map(
+          () =>
+            diceImages[
+              Object.keys(diceImages)[
+                Math.floor(Math.random() * 4)
+              ] as keyof typeof diceImages
+            ]
+        );
       setDisplayedDice(randomDice);
       animationFrames++;
-      
       setTimeout(animate, 100);
     };
-
     animate();
   };
 
