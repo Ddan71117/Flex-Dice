@@ -1,25 +1,14 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import { ScrollContainer } from "./ScrollContainer";
 
-export default function GameLog() {
-  const [winnings, setWinnings] = useState(0);
-  const [losses, setLosses] = useState(0);
-  const [gamesPlayed, setGamesPlayed] = useState(0);
-  const [userName, setUserName] = useState("");
+type GameLogProps = {
+  gameLog: string[];
+};
+
+export default function GameLog({ gameLog }: GameLogProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
-
-  // Simulating game stats for demonstration
-  useEffect(() => {
-    // Here you can replace this with real data or fetch it from your state/store
-    setWinnings(10);
-    setLosses(5);
-    setGamesPlayed(15);
-    const storedUserName = localStorage.getItem("userName");
-    if (storedUserName) {
-      setUserName(storedUserName);
-    }
-  }, []);
 
   const openModal = () => {
     setIsModalOpen(true);
@@ -28,6 +17,7 @@ export default function GameLog() {
   const closeModal = () => {
     setIsModalOpen(false);
   };
+
   return (
     <div>
       <button
@@ -38,29 +28,26 @@ export default function GameLog() {
       </button>
 
       {isModalOpen && (
-        <div className="fixed bottom-4 right-4 bg-gray-800 p-6 rounded-lg w-80 sm:w-96 max-w-sm mx-auto shadow-lg z-50">
-          {/* Adjusting padding to remove excessive margins */}
-          <div className="bg-gray-800 p-4 rounded-lg w-full max-w-xs sm:max-w-sm mx-auto text-left">
+        <div className="fixed bottom-4 right-4 w-96 max-w-lg mx-auto p-4 bg-gray-800 border rounded-lg">
+          <div className="bg-gray-800 p-4 rounded-lg w-full max-w-sm mx-auto text-left">
             <h3 className="text-2xl font-bold text-white text-center mb-4">
-              {userName} Stats
+              Game Log
             </h3>
 
-            <div className="flex justify-between text-white text-md mb-2">
-              <span>Winnings:</span>
-              <span>{winnings}</span>
-            </div>
-            <div className="flex justify-between text-white text-md mb-2">
-              <span>Losses:</span>
-              <span>{losses}</span>
-            </div>
-            <div className="flex justify-between text-white text-md mb-2">
-              <span>Games Played:</span>
-              <span>{gamesPlayed}</span>
+            {/* Game Log Scrollable Container */}
+            <div className="max-h-64 overflow-hidden">
+              <ScrollContainer>
+                {gameLog.map((log, index) => (
+                  <div key={index} className="text-sm mb-1 text-white">
+                    {log}
+                  </div>
+                ))}
+              </ScrollContainer>
             </div>
 
             {/* Close Button */}
             <button
-              className="mt-4 bg-red-500 text-white p-2 rounded-lg"
+              className="mt-4 bg-red-500 text-white px-4 py-2 rounded-lg w-full"
               onClick={closeModal}
             >
               Close
