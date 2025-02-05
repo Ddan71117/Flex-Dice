@@ -159,13 +159,6 @@ const PokerTable: React.FC<PokerTableProps> = ({ setGameLog }) => {
 
   const centerPot = players.find((p) => p.id === 0)?.chips || 0;
 
-  const getAvatarImage = (id: number): string => {
-    if (id === 1) return `/images/avatar1.png`;
-    return `https://i.pravatar.cc/100?img=${id + 5}`;
-  };
-
-  const centerPot = players.find(p => p.id === 0)?.chips || 0;
-
   const getPlayerName = (playerId: number) => {
     return playerId === 1 ? "You" : `Player ${playerId}`;
   };
