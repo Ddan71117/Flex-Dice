@@ -3,6 +3,9 @@ import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import RulesRef from "./Rulesref";
 import AvatarCarousel from "./AvatarCarousel";
+// import { logout } from '../lib/actions'
+import { boolean } from "zod";
+import { signOut } from '../pages/api/auth/[...nextauth]'
 
 const Nav: React.FC = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -27,14 +30,15 @@ const Nav: React.FC = () => {
 
   const handleSignOut = async () => {
     try {
-      const res = await fetch("/pages/api/logout", { method: "POST" });
-      if (res.ok) {
+      const res = await signOut({ redirect: false });
+      console.log(res)
+      if (Boolean(res)) {
         setIsLoggedIn(false);
         localStorage.clear();
 
         router.push("/");
       } else {
-        console.error("Logout failed:", res.statusText);
+        console.error("Logout failed:", res);
       }
     } catch (error) {
       console.error("Error signing out:", error);
