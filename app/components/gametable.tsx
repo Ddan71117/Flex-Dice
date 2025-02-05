@@ -68,7 +68,7 @@ const PokerTable: React.FC = () => {
   };
 
   const playerPositions = [
-    { top: '5%', left: '40%', transform: '-translate-x-1/2' },
+    { top: '5%', left: '42%', transform: '-translate-x-1/2' },
     { top: '30%', left: '10%' },
     { top: '70%', left: '10%' },
     { top: '70%', right: '10%' },
@@ -94,31 +94,48 @@ const PokerTable: React.FC = () => {
         {players.slice(0, 5).map((player, index) => (
           <div 
             key={player.id} 
-            className={`absolute ${index === currentPlayerIndex && !gameState.isRolling ? 
-              "border-4 border-yellow-400 p-2 rounded-full animate-pulse ring-4 ring-yellow-500 transition-all duration-500" : ""}`}
+            className={`absolute ${
+              index === currentPlayerIndex && !gameState.isRolling 
+                ? "border-4 border-yellow-400 p-2 rounded-full animate-pulse ring-4 ring-yellow-500 transition-all duration-500" 
+                : ""
+            }`}
             style={{
               ...playerPositions[index],
               transform: playerPositions[index].transform || 'none',
             }}
           >
             <div className="flex flex-col items-center">
-              <div className="relative">
-                <img 
-                  src={getAvatarImage(player.id)} 
-                  alt={`Player ${player.id}`} 
-                  className="w-16 h-16 rounded-full shadow-lg"
-                />
-                {player.chips > 0 && (
+              {player.id === 1 ? (
+                // 🟢 Differentiate Player 1 (You) 
+                <div className="w-12 h-12 flex items-center justify-center bg-blue-500 text-white font-bold rounded-full shadow-lg border-4 border-white">
+                  YOU
+                </div>
+              ) : (
+                // 🟡 Other Players (Show Avatar)
+                <div className="relative">
                   <img 
-                    src={getChipStackImage(player.chips)}
-                    alt={`${player.chips} chips`}
-                    className="absolute -bottom-4 -right-4 w-8 h-8"
+                    src={getAvatarImage(player.id)} 
+                    alt={`Player ${player.id}`} 
+                    className="w-16 h-16 rounded-full shadow-lg"
                   />
-                )}
+                </div>
+              )}
+
+              {/* 🔵 Chip Stack */}
+              {player.chips > 0 && (
+                <img 
+                  src={getChipStackImage(player.chips)}
+                  alt={`${player.chips} chips`}
+                  className="absolute -bottom-4 -right-4 w-8 h-8"
+                />
+              )}
+
+              {/* 🔴 Player Name & Chips */}
+              <div className="bg-black bg-opacity-50 px-4 py-2 rounded-full flex items-center space-x-2">
+                <p className={`text-center mt-4 ${player.id === 1 ? "text-blue-400 font-bold" : "text-white"}`}>
+                  {player.id === 1 ? "You" : `Player ${player.id}`} : {player.chips} chip{player.chips !== 1 ? 's' : ''}
+                </p>
               </div>
-              <p className="text-white text-center mt-4">
-                Player {player.id}: {player.chips} chip{player.chips !== 1 ? 's' : ''}
-              </p>
             </div>
           </div>
         ))}
