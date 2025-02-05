@@ -1,37 +1,56 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
-## Getting Started
+  # Title
+   Flex-Dice
+   
 
-First, run the development server:
+  ## Table of Contents
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+  - [Description](#description)
+  - [Design](#design)
+  - [Install](#install)
+  - [Contributor](#contributor)
+  - [License](#license)
+  - [Questions](#questions)
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+  ## Description
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+   Flex-Dice is a single-player dice game where players compete against an AI opponent in a fun, fast-paced version of the popular game Left, Right, Center (LRC). The objective is simple: roll the dice, manage your chips, and be the last player with remaining chips to win. Flex-Dice combines the classic mechanics of LRC with the challenge of playing against a dynamic AI, offering an exciting experience that tests both your luck and strategy. Whether you're playing for fun or aiming to beat the AI, Flex-Dice guarantees an engaging and unpredictable gameplay experience!
 
-## Learn More
+  ## Design
 
-To learn more about Next.js, take a look at the following resources:
+    By building this game, you wanted to offer an easily accessible, fun, and competitive gaming experience without needing other players, allowing people to enjoy the thrill of the game anytime, anywhere.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Try out our game! [Flex-Dice](https://flex-dice.vercel.app/)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
-## Deploy on Vercel
+<img src='public/images/main_pg.png' alt="main page" width="600" />
+<img src='public/images/signup.png' alt="signup page" width="400" /><img src='public/images/login.png' alt="login page" width="400" />
+<img src='public/images/select_avatar.png' alt="select avatar" width="400" height="400" />
+<img src='public/images/your_avatar.png' alt="select avatar" width="400" height="400"/>
+<img src='public/images/game_page.png' alt="game page" width="400"height="400" />
+<img src='public/images/game_start.png' alt="game start" width="400"height="400" />
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+<img src='public/images/chat_form.png' alt="chat form" width="400" height="400" /><img src='public/images/chat_msg.png' alt="chat_msg" width="400" height="400" />
+<img src='public/images/gamelog.png' alt="game log" width="400" height="400" />
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
-# Flex-Dice
+
+  ## Install
+
+    npm run start
+
+  ## Contributor
+
+    mvoidets, daniel, oscar, andrew
+
+  ## License
+
+    This is not licensed  
+
+  ### Questions
+
+  
+
+  My GitHub profile is [Ddan71117](https://guthub.com/Ddan71117).
+
+  Thank you for visiting my repository!
