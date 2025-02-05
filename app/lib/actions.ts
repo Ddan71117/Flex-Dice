@@ -47,6 +47,80 @@ export async function createUsersTable() {
   }
 }
 
+export async function createStatTable() {
+  try {
+    await sql`
+      CREATE TABLE IF NOT EXISTS gamestats (
+        id SERIAL PRIMARY KEY,
+        user_id INTEGER REFERENCES users(id),
+        winnings INTEGER DEFAULT 0,
+        losses INTEGER DEFAULT 0,
+        games_played INTEGER DEFAULT 0,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+    `;
+    console.log("Stats table created successfully.");
+  } catch (error) {
+    console.error("Error creating stats table:", error);
+  }
+}
+
+export async function handleWin(userId: number) {
+  try {
+    const result = await sql`
+      SELECT * FROM gamestats WHERE user_id = ${userId}
+    `;
+    
+    if (result.length === 0) {
+      console.error(`User with user_id: ${userId} does not exist in gamestats`);
+      return;
+    }
+    await sql`
+      UPDATE gamestats
+      SET winnings = winnings + 12,
+          games_played = games_played + 1
+      WHERE user_id = ${userId};`
+    console.log(`Updated winnings and games_played for user_id: ${userId}`);
+  } catch (error) {
+    console.error("Error updating winnings:", error);
+  }
+}
+
+export async function getUserStats(userId: number) {
+  try {
+    const result = await sql`
+      SELECT * FROM gamestats WHERE user_id = ${userId}
+    `;
+    return result ? result[0] : null;
+  } catch (error) {
+    console.error("Error retrieving user stats:", error);
+    return null;
+  }
+}
+
+export async function handleLoss(userId: number) {
+  try {
+    const result = await sql`
+      SELECT * FROM gamestats WHERE user_id = ${userId}
+    `;
+    
+    if (result.length === 0) {
+      console.error(`User with user_id: ${userId} does not exist in gamestats`);
+      return;
+    } 
+    await sql`
+      UPDATE gamestats
+      SET losses = losses + 1,
+          games_played = games_played + 1
+      WHERE user_id = ${userId};
+    `;
+    console.log(`Updated losses and games_played for user_id: ${userId}`);
+
+  } catch (error) {
+    console.error("Error updating losses:", error);
+  }
+}
+
 // Function to retrieve user by username
 export async function getUserByUsername(username: string) {
   try {
@@ -96,3 +170,32 @@ export async function logout(response: any) {
     console.error("Error logging out user:", error);
   }
 }
+
+export async function populateGameStats() {
+  try {
+    // Get all users from the users table
+    const users = await sql`
+      SELECT id FROM users
+    `;
+
+    // Insert a new row into the gamestats table for each user
+    for (const user of users) {
+      await sql`
+        INSERT INTO gamestats (user_id)
+        VALUES (${user.id})
+        ON CONFLICT (user_id) DO NOTHING
+      `;
+    }
+
+    console.log("Gamestats table populated successfully.");
+  } catch (error) {
+    console.error("Error populating gamestats table:", error);
+  }
+}
+
+export async function initializeApp() {
+  await populateGameStats();
+  
+}
+
+initializeApp().catch(console.error);

@@ -19,9 +19,9 @@ export const authConfig = {
     },
     async session({ session, token, user }) {
       
-      // console.log('session callback - session:', session);
-      // console.log('session callback - token:', token);
-      // console.log('session callback - user:', user);
+      console.log('session callback - session:', session);
+      console.log('session callback - token:', token);
+      console.log('session callback - user:', user);
       
      
       

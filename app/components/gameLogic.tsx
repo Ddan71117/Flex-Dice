@@ -1,6 +1,9 @@
 'use client';
 import { useState, useEffect } from 'react';
+import getSession from '../lib/getSession';
+import { type User } from 'next-auth';
 import '../globals.css';
+import { handleWin, handleLoss } from '../lib/actions';
 
 type Player = {
   id: number;
@@ -27,11 +30,68 @@ export default function Game() {
   const [currentPlayerIndex, setCurrentPlayerIndex] = useState(0);
   const [gameLog, setGameLog] = useState<string[]>([]);
   const [winner, setWinner] = useState<number | null>(null);
+  const [user, setUser] = useState<User>({username: '', id: ''});
+
   const [gameState, setGameState] = useState<GameState>({
     isRolling: false,
     isProcessingResults: false,
     diceCount: 3
   });
+const getAuth = async() => {
+      const userData = await getSession()
+      console.log('session user data', userData)
+      if (userData) {
+        setUser(userData)
+      }
+    }
+  useEffect(() => {
+    getAuth()
+  }, [])
+
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      const userData = await getSession();
+      if (userData) {
+        setPlayers((prevPlayers) => {
+          const updatedPlayers = [...prevPlayers];
+          updatedPlayers[0] = { id: parseInt(userData.id), chips: 3, diceResult: null };
+          return updatedPlayers;
+        });
+      }
+    };
+    fetchUser();
+  }, []);
+
+  useEffect(() =>{
+    if (user)  {
+    let id = user?.id?.toString() || ''
+    if (winner?.toString() !== id && winner !== null) {
+      console.log('you lost!')
+      console.log(winner)
+      if (user.id) {
+        console.log(parseInt(user.id));
+        handleLoss(parseInt(user.id));
+      }
+    }
+  }
+  },[winner])
+
+  useEffect(() =>{
+    if (user)  {
+    let id = user?.id?.toString() || ''
+    if (winner?.toString() === id && winner !== null) {
+      console.log('you win!')
+      console.log(winner)
+      if (user.id) {
+        console.log(parseInt(user.id));
+        handleWin(parseInt(user.id));
+      }
+      
+    }
+  }
+  },[winner])
+
 
   useEffect(() => {
     const activePlayers = players.filter(player => player.id !== 0 && player.chips > 0);
@@ -41,7 +101,7 @@ export default function Game() {
   }, [players]);
 
   useEffect(() => {
-    if (!gameState.isRolling && !gameState.isProcessingResults && players[currentPlayerIndex].id !== 1) {
+    if (!gameState.isRolling && !gameState.isProcessingResults && players[currentPlayerIndex].id !== players[0].id ) {
       const timer = setTimeout(() => {
         handleTurn();
       }, 1000);
@@ -84,6 +144,7 @@ export default function Game() {
 
     setTimeout(() => {
       setGameState(prev => ({ ...prev, isProcessingResults: false }));
+
       nextTurn();
     }, 1000);
   };
@@ -92,6 +153,7 @@ export default function Game() {
     if (winner !== null || gameState.isRolling) return;
 
     const player = players[currentPlayerIndex];
+    
     if (player.chips === 0) {
       setGameLog((log) => [...log, `Player ${player.id} is out of chips :(`]);
       nextTurn();
@@ -116,6 +178,7 @@ export default function Game() {
     newPlayers[currentPlayerIndex].diceResult = rolls;
     setPlayers(newPlayers);
 
+
     return rolls;
   };
 
@@ -137,6 +200,7 @@ export default function Game() {
     currentPlayerIndex,
     gameState,
     setGameState,
-    processResults
+    processResults,
+    user
   };
 }
