@@ -4,7 +4,7 @@ import getSession from "../lib/getSession";
 import { type User } from "next-auth";
 import "../globals.css";
 import { handleWin, handleLoss } from "../lib/actions";
-import { Chicle } from 'next/font/google';
+// import { Chicle } from 'next/font/google';
 
 type Player = {
   id: number;
