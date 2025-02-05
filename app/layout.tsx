@@ -27,6 +27,7 @@ export default function RootLayout({ children }: LayoutProps) {
         className={`${robotoMono.className} relative min-h-screen bg-cover bg-center bg-no-repeat`}
         style={{
           backgroundImage: "url('/images/fade_lrc.jpg')",
+          // backgroundAttachment: "fixed",
         }}
       >
         {showNav ? <Nav /> : <NavPostLogin />}
