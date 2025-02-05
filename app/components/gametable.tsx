@@ -3,7 +3,6 @@ import React, { useState, useEffect } from "react";
 import Game from "./gameLogic";
 import { useSession } from "next-auth/react";
 
-
 type PokerTableProps = {
   setGameLog: React.Dispatch<React.SetStateAction<string[]>>;
 };
@@ -51,40 +50,38 @@ const PokerTable: React.FC<PokerTableProps> = ({ setGameLog }) => {
     '/images/luke.png': 'Luke Skywalker',
   };
 
-  const diceImages = {
-    L: "/images/dice3.png",
-    R: "/images/dice4.png",
-    C: "/images/dice2.png",
-    "•": "/images/dice1.png",
+  const diceImages: { [key: string]: string } = {
+    'L': "/images/dice3.png",
+    'R': "/images/dice4.png",
+    'C': "/images/dice2.png",
+    '•': "/images/dice1.png",
+    'default': "/images/dice1.png"
   };
 
-  // Function to get Avatar Image
+  const getDiceImage = (diceValue: string): string => {
+    return diceImages[diceValue] || diceImages.default;
+  };
+
   const getAvatarImage = (id: number): string => {
     if (id === 1 && userAvatar) {
-      return userAvatar; // Player 1 (logged-in user)
+      return userAvatar;
     }
-    return playerAvatars[id] || ""; // Return assigned avatar for other players
+    return playerAvatars[id];
   };
 
-  // Setup initial avatars for players
   useEffect(() => {
-    // Fetch the logged-in user's avatar from localStorage
     const storedAvatar = localStorage.getItem("selectedAvatar");
     if (storedAvatar) {
-      setUserAvatar(storedAvatar); // Set logged-in user avatar
+      setUserAvatar(storedAvatar);
     } else {
-      setUserAvatar("/images/orig_yoda.png"); // Default avatar for player 1
+      setUserAvatar("/images/orig_yoda.png");
     }
 
-    // Assign static avatars to other players
     const avatars: { [key: number]: string } = {};
-    const avatarSet = new Set(availableAvatars);
-    let remainingAvatars = [...availableAvatars];
+    const remainingAvatars = [...availableAvatars];
 
-    // Ensure no duplicate avatars
     players.forEach((player) => {
       if (player.id !== 1 && !avatars[player.id]) {
-        // Select a static avatar for non-logged-in players
         const avatar = remainingAvatars[player.id % remainingAvatars.length];
         avatars[player.id] = avatar;
       }
@@ -93,7 +90,6 @@ const PokerTable: React.FC<PokerTableProps> = ({ setGameLog }) => {
     setPlayerAvatars(avatars);
   }, [session, players]);
 
-  // Function to get chip stack image
   const getChipStackImage = (chips: number): string => {
     if (chips <= 0) return "";
     if (chips <= 2) return "/images/smCoins.png";
@@ -101,22 +97,23 @@ const PokerTable: React.FC<PokerTableProps> = ({ setGameLog }) => {
     return "/images/lgCoins.png";
   };
 
-  // Start dice animation
   const startDiceAnimation = () => {
     let animationFrames = 0;
     const maxFrames = 30;
     const currentDiceCount = Math.min(players[currentPlayerIndex].chips, 3);
+
     const animate = () => {
       if (animationFrames >= maxFrames) {
         const results = players[currentPlayerIndex].diceResult || [];
-        setDisplayedDice(
-          results.map((result) => diceImages[result as keyof typeof diceImages])
-        );
+        const resultImages = results.map(result => getDiceImage(result));
+        setDisplayedDice(resultImages);
+        
         setGameState((prev) => ({
           ...prev,
           isRolling: false,
           isProcessingResults: true,
         }));
+        
         processResults(results, currentPlayerIndex);
         setGameLog((log) => [
           ...log,
@@ -124,16 +121,18 @@ const PokerTable: React.FC<PokerTableProps> = ({ setGameLog }) => {
         ]);
         return;
       }
-      const randomDice = Array(currentDiceCount)
-        .fill(null)
-        .map(
-          () =>
-            diceImages[Object.keys(diceImages)[Math.floor(Math.random() * 4)] as keyof typeof diceImages]
-        );
+
+      const randomDice = Array(currentDiceCount).fill(null).map(() => {
+        const diceKeys = Object.keys(diceImages).filter(key => key !== 'default');
+        const randomKey = diceKeys[Math.floor(Math.random() * diceKeys.length)];
+        return getDiceImage(randomKey);
+      });
+
       setDisplayedDice(randomDice);
       animationFrames++;
-      setTimeout(animate, 100);
+      requestAnimationFrame(() => setTimeout(animate, 100));
     };
+
     animate();
   };
 
@@ -143,7 +142,6 @@ const PokerTable: React.FC<PokerTableProps> = ({ setGameLog }) => {
     }
   }, [gameState.isRolling]);
 
-  // Click handler for turning
   const onTurnClick = () => {
     handleTurn();
   };
@@ -156,12 +154,7 @@ const PokerTable: React.FC<PokerTableProps> = ({ setGameLog }) => {
     { top: '30%', left: '10%' },                                   // Player 5 (top left)
   ];
 
-
   const centerPot = players.find((p) => p.id === 0)?.chips || 0;
-
-  const getPlayerName = (playerId: number) => {
-    return playerId === 1 ? "You" : `Player ${playerId}`;
-  };
 
   return (
     <div className="fixed inset-0 flex items-center justify-center mt-20">
@@ -173,9 +166,8 @@ const PokerTable: React.FC<PokerTableProps> = ({ setGameLog }) => {
         />
 
         {players.slice(0, 5).map((player, index) => (
-
           <div
-            key={`${player.id}-${index}`} // Combine player.id and index for a unique key
+            key={`${player.id}-${index}`}
             className={`absolute ${index === currentPlayerIndex && !gameState.isRolling
                 ? "border-4 border-yellow-400 p-2 rounded-full animate-pulse ring-4 ring-yellow-500 transition-all duration-500"
                 : ""
@@ -187,8 +179,6 @@ const PokerTable: React.FC<PokerTableProps> = ({ setGameLog }) => {
           >
             <div className="flex flex-col items-center">
               {player.id === 1 ? (
-
-                // 🟢 Differentiate Player 1 (You)
                 <div className="w-12 h-12 flex items-center justify-center bg-blue-500 text-white font-bold rounded-full shadow-lg border-4 border-white">
                    <img
                     src={userAvatar}
@@ -227,18 +217,22 @@ const PokerTable: React.FC<PokerTableProps> = ({ setGameLog }) => {
           </div>
         ))}
 
-        {/* Center pot */}
         <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 flex flex-col items-center space-y-4">
           <div className="flex space-x-4">
             {displayedDice.map((dice, index) => (
               <img
-                key={index}
+                key={`dice-${index}-${dice}`}
                 src={dice}
                 alt={`Dice ${index + 1}`}
                 className={`w-12 h-12 ${gameState.isRolling ? "animate-bounce" : ""}`}
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  target.src = diceImages.default;
+                }}
               />
             ))}
           </div>
+          
           {centerPot > 0 && (
             <div className="bg-black bg-opacity-50 px-4 py-2 rounded-full flex items-center space-x-2 mb-4">
               <img 
@@ -303,6 +297,4 @@ const PokerTable: React.FC<PokerTableProps> = ({ setGameLog }) => {
   );
 };
 
-
 export default PokerTable;
-
