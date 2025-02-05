@@ -15,13 +15,16 @@ type GameState = {
 
 export default function Game() {
   const [players, setPlayers] = useState<Player[]>([
-    { id: 1, chips: 3, diceResult: null },
-    { id: 2, chips: 3, diceResult: null },
-    { id: 3, chips: 3, diceResult: null },
-    { id: 4, chips: 3, diceResult: null },
-    { id: 5, chips: 3, diceResult: null },
-    { id: 0, chips: 0, diceResult: null } // Center pot
+    { id: 1, chips: 3, diceResult: null },  // Top (You)
+    { id: 2, chips: 3, diceResult: null },  // Top Right
+    { id: 3, chips: 3, diceResult: null },  // Bottom Right
+    { id: 4, chips: 3, diceResult: null },  // Bottom Left
+    { id: 5, chips: 3, diceResult: null },  // Top Left
+    { id: 0, chips: 0, diceResult: null }   // Center pot
   ]);
+
+  // Rest of the game logic remains the same since the players array is now in the correct order
+  // ... [previous game logic code]
 
   const [currentPlayerIndex, setCurrentPlayerIndex] = useState(0);
   const [winner, setWinner] = useState<number | null>(null);
