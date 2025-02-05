@@ -42,9 +42,9 @@ const Nav: React.FC = () => {
   };
 
   return (
-    <nav className="fixed w-full bg-gray-gradient bg-[length:400%_400%] animate-gradient mt-10 text-white flex justify-between items-center z-30">
+    <nav className="fixed top-0 w-full bg-gray-gradient bg-[length:400%_400%] animate-gradient mt-10 text-white flex justify-between items-center z-30">
       <div className="text-5xl p-4 font-semibold" style={{ marginLeft: "17%" }}>
-        Flex-Dice
+        <img src="/images/FLEXDICE.png" className="w-48 h-auto" alt="FlexDice Logo"/>
       </div>
       <div className="p-4" style={{ marginRight: "17%" }}>
         {isGamePage && (
