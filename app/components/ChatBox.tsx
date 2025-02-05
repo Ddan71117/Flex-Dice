@@ -20,27 +20,7 @@ export default function ChatBox() {
   >([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  //for getting uses from auth but not sure api/route
-  // const fetchUser = async () => {
-  //   try {
-  //     const response = await fetch("/api/user", {
-  //       method: "GET",
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //         // Add your authentication token or session cookie here if necessary
-  //       },
-  //     });
 
-  //     if (response.ok) {
-  //       const data = await response.json();
-  //       setUserName(data.userName); // Assuming the API returns { userName: "username" }
-  //     } else {
-  //       console.error("Failed to fetch user data");
-  //     }
-  //   } catch (error) {
-  //     console.error("Error fetching user data:", error);
-  //   }
-  // };
 
   // fetchUser();  // Fetch user data when component mounts
 
@@ -76,16 +56,10 @@ export default function ChatBox() {
   }
   }, []);
 
-  // const handleUserNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-  //   const storedUsername = localStorage.getItem("username")
-  //   if (storedUsername)
-  //   setUserName(storedUsername);
-  // };
-  
   // Join room logic
   const handleJoinRoom = () => {
     if (room && userName) {
-      socket.emit("join-room", { room, userName });
+      //socket.emit("join-room", { room, userName });
       setJoined(true);
     }
   };
