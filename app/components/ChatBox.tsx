@@ -205,8 +205,7 @@ export default function ChatBox() {
       };
     });
   };
-
-  
+//testing this out 
   const handleCreateRoom = () => {
     if (tempRoom.trim().length < 2) {
       console.error("Room name should be at least 2 characters long.");
