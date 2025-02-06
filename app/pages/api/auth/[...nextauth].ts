@@ -64,15 +64,13 @@ export const { auth, signIn, signOut } =NextAuth({
   },
   callbacks: {
     async jwt({ token, user }) {
-      // console.log('token1', token);
-      // console.log('user1', user);
+      
 
       if (user) {
         token.id = user.id;
         token.username = user.username;
       }
-      // console.log('token2', token);
-      // console.log('user2', user);
+      
       return token;
     },
     async session({ session, token }) {

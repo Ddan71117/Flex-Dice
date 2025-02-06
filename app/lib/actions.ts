@@ -10,18 +10,16 @@ const sql = neon(process.env.DATABASE_URL || "");
 // Function to authenticate user
 export async function authenticate(username: string, password: string) {
   try {
-    // const user = await getUserByUsername(username);
+    
     const user = await signIn('credentials', { username, password, redirect: false }) // Use;
     console.log("User: ", user);
     if (!user) {
       throw new Error("User not found");
     }
 
-    // const isMatch = await bcryptjs.compare(password, user.password);
+    
 
-    // if (!isMatch) {
-    //   throw new Error("Invalid credentials");
-    // }
+    
     console.log("User: ", user);
     return user;
   } catch (error) {
@@ -173,12 +171,12 @@ export async function logout() {
 
 export async function populateGameStats() {
   try {
-    // Get all users from the users table
+    
     const users = await sql`
       SELECT id FROM users
     `;
 
-    // Insert a new row into the gamestats table for each user
+    
     for (const user of users) {
       await sql`
         INSERT INTO gamestats (user_id)

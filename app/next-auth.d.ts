@@ -24,9 +24,3 @@ declare module "next-auth" {
   }
 }
 
-// declare module "@auth/core/adapters" {
-//   export interface AdapterUser extends DefaultAdapterUser {
-//     id: string;
-//     username: string;
-//   }
-// }

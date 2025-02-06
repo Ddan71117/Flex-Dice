@@ -15,7 +15,7 @@ const [loading, setLoading] = useState(false);
 
 const getAuth = async() => {
       const userData = await getSession()
-      console.log('session user data', userData)
+      
       if (userData) {
         
         setUserName(userData.username)
