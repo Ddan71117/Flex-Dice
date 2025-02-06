@@ -18,7 +18,15 @@ client.connect().then(() => {
 }).catch((error) => {
     console.error('Failed to connect to PostgreSQL:', error);
 });
-
+// Test query to check if DB is responding
+const testDBConnection = async () => {
+    try {
+        await client.query('SELECT NOW()');
+        console.log('Database is responding to queries');
+    } catch (error) {
+        console.error('Error executing test query:', error.message);
+    }
+};
 client.query('SELECT NOW()')
     .then(() => {
         console.log('Database is responding to queries');
@@ -33,6 +41,7 @@ const getRoomsFromDB = async () => {
         const res = await client.query('SELECT name FROM rooms');
         console.log('Rooms from DB:', res.rows.map(row => row.name));  // Log after the query
         return res.rows.map(row => row.name);
+        
     } catch (error) {
         console.error('Error fetching rooms from DB:', error);
         return [];
@@ -61,6 +70,17 @@ const saveMessageToDatabase = async (room, message, sender) => {
         console.error('Error saving message to DB:', error);
     }
 };
+client.on('error', (error) => {
+    console.error('Database client error:', error);
+    // Try to reconnect if needed
+    client.connect()
+        .then(() => {
+            console.log('Reconnected to PostgreSQL database');
+        })
+        .catch((error) => {
+            console.error('Failed to reconnect to PostgreSQL:', error);
+        });
+});
 
 // Get message history
 export async function getMessagesFromDB(roomName) {
@@ -160,7 +180,7 @@ app.prepare().then(() => {
         // Fetch and emit message history for the room
         const messages = await getMessagesFromDB(room);
         socket.emit('messageHistory', messages, room);  // Emit message history for the specific room
-
+        
         // Emit system message for the user joining
         io.to(room).emit('user_joined', `${userName} has joined the room: ${room}`, room);
     } catch (error) {
@@ -172,20 +192,29 @@ app.prepare().then(() => {
         // Handle room creation
         socket.on('createRoom', async (newRoom) => {
             try {
+                // Check if room already exists
                 const checkRes = await client.query('SELECT * FROM rooms WHERE name = $1', [newRoom]);
-
+        
                 if (checkRes.rows.length > 0) {
                     console.log('Room already exists');
+                    // Emit failure response to client
+                    socket.emit('createRoomResponse', { success: false, error: 'Room already exists' });
                     return;
                 }
-
+        
+                // Create the new room in the database
                 const res = await client.query('INSERT INTO rooms (name) VALUES ($1) RETURNING *', [newRoom]);
                 console.log(`Room created: ${newRoom}`);
-
-                // Emit the updated available rooms
+        
+                // Emit success response to the client
+                socket.emit('createRoomResponse', { success: true, room: newRoom });
+        
+                // Emit the updated available rooms to all clients
                 io.emit('availableRooms', await getRoomsFromDB());
             } catch (error) {
                 console.error('Error creating room:', error);
+                // Emit error response to client
+                socket.emit('createRoomResponse', { success: false, error: 'Error creating room' });
             }
         });
 
@@ -204,7 +233,7 @@ app.prepare().then(() => {
         socket.on('leave-room', (room, name) => {
             console.log(`User: ${name}, has left the room: ${room}`);
             socket.leave(room);
-            socket.to(room).emit('user_left', `${socket.id} left the room`);
+            socket.to(room).emit('user_left', `${name} has left the room`);
         });
 
         // Handle removeRoom event
@@ -240,12 +269,19 @@ app.prepare().then(() => {
             await saveMessageToDatabase(room, sender, message);
         
             // Emit the new message to the room
-            io.to(room).emit('newMessage', { sender, message });
+            io.to(room).emit('newMessage', { sender, message,room });
             } catch (error) {
             console.error('Error saving message to DB:', error);
             }
         });
-  
+        socket.on("get-message-history", async (room) => {
+            // Query your database to fetch the message history for this room
+            const history = await getMessageHistoryFromDatabase(room);
+            
+            // Emit the message history back to the client
+            socket.emit("messageHistory", history, room);
+          });
+          
         
 
     }); // <-- Closing brace here
