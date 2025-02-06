@@ -8,8 +8,6 @@ const dev = process.env.NODE_ENV !== 'production';
 const hostname = process.env.HOSTNAME || 'localhost';
 const port = process.env.PORT || '3005';
 
-
-
 // Database client initialization
 const client = new Client({
     connectionString: process.env.DATABASE_URL,
@@ -20,6 +18,14 @@ client.connect().then(() => {
 }).catch((error) => {
     console.error('Failed to connect to PostgreSQL:', error);
 });
+
+client.query('SELECT NOW()')
+    .then(() => {
+        console.log('Database is responding to queries');
+    })
+    .catch((error) => {
+        console.error('Error executing test query:', error.message);
+    });
 
 // Fetch available rooms from DB
 const getRoomsFromDB = async () => {
@@ -33,14 +39,13 @@ const getRoomsFromDB = async () => {
     }
 };
 
-
 // Handle room creation
 const createRoomInDB = async (newRoom) => {
     try {
         const checkRes = await client.query('SELECT * FROM rooms WHERE name = $1', [newRoom]);
         if (checkRes.rows.length > 0) return null;
-        const res = await client.query('INSERT INTO rooms (name) VALUES ($1) RETURNING *', [newRoom]);
-        return res.rows[0];
+        await client.query('INSERT INTO rooms (name) VALUES ($1) RETURNING *', [newRoom]);
+        return newRoom;
     } catch (error) {
         console.error('Error creating room in DB:', error);
         return null;
@@ -64,15 +69,12 @@ export async function getMessagesFromDB(roomName) {
             'SELECT sender, message, created_at FROM messages WHERE room_name = $1 ORDER BY created_at ASC',
             [roomName]
         );
-        console.log('Message from DB:', message);
         return res.rows;
     } catch (error) {
         console.error('Error fetching messages from DB:', error);
         return [];
     }
 };
-
-
 
 // Dice rolling logic
 const rollDice = (chips) => {
@@ -90,7 +92,6 @@ const processDiceResults = async (diceResults, playerId, roomId) => {
         const updatedPlayers = await updatePlayerChips(playerId, totalRoll, roomId);
         return updatedPlayers;
     } catch (error) {
-        //console.error('Error processing dice results:', error);
         throw error;
     }
 };
@@ -138,85 +139,36 @@ app.prepare().then(() => {
             allowedHeaders: ["Content-Type"],
             credentials: true,
         },
+        pingInterval: 25000,  // Send ping every 25 seconds
+        pingTimeout: 60000,   // Timeout if no pong response in 60 seconds
     });
+
     io.on('connection', (socket) => {
         console.log(`A player connected: ${socket.id}`);
 
-        socket.on('roll-dice', async ({ playerId, currentChips, room }) => {
-            try {
-                // Roll the dice
-                const diceResults = rollDice(currentChips);
-
-                // Process the dice results and update players
-                const updatedPlayers = await processDiceResults(diceResults, playerId, room);
-
-                // Emit updated game state to all players in the room
-                io.to(room).emit('gameStateUpdated', updatedPlayers);
-
-                // Emit dice result to the player who rolled
-                socket.emit('diceResult', diceResults);
-            } catch (error) {
-                console.error('Error rolling dice:', error);
-                socket.emit('error', 'An error occurred while processing your turn.');
-            }
-        });
-
-        
         // Handle the 'join-room' event
         socket.on('join-room', async ({ room, userName }) => {
-            console.log(`Received join-room event for user: ${userName}, room: ${room}`);  // Log for debugging
+       console.log(`Received join-room event for user: ${userName}, room: ${room}`);
+    if (!userName) {
+        console.error("Error: userName is undefined when joining room");
+        return;
+    }
 
-            // If userName is undefined, return early
-            if (!userName) {
-                console.error("Error: userName is undefined when joining room");
-                return;
-            }
+    try {
+        socket.join(room);
 
-            try {
-                // Ensure the user joins the room
-                socket.join(room);
-                console.log(`${userName} joined the room: ${room}`);
+        // Fetch and emit message history for the room
+        const messages = await getMessagesFromDB(room);
+        socket.emit('messageHistory', messages, room);  // Emit message history for the specific room
 
-                // Fetch or create the game
-                const game = await createOrGetGame(room);
-                if (!game) {
-                    console.error('Game not found!');
-                    return;
-                }
+        // Emit system message for the user joining
+        io.to(room).emit('user_joined', `${userName} has joined the room: ${room}`, room);
+    } catch (error) {
+        console.error('Error in join-room handler:', error);
+    }
+});
 
-                // Check if the player already exists in the database for the room/game
-                const checkPlayer = await client.query('SELECT * FROM players WHERE game_id = $1 AND playername = $2', [game.id, userName]);
-                if (checkPlayer.rows.length === 0) {
-                    // Add the player if they don't exist in the players table
-                    const res = await client.query('INSERT INTO players (game_id, playername, chips) VALUES ($1, $2, $3) RETURNING *', [game.id, userName, 3]); // Initial chips
-                    console.log(`Player added: ${userName}`);
-                }
 
-                // Insert the player’s turn into the players_turn table if it's the first player
-                const playerId = checkPlayer.rows.length === 0 ? res.rows[0].id : checkPlayer.rows[0].id;
-                const currentTurn = await client.query('SELECT * FROM players_turn WHERE game_id = $1 ORDER BY turn_number ASC LIMIT 1', [game.id]);
-
-                if (currentTurn.rows.length === 0) {
-                    // Set the current player as the first player
-                    await client.query(
-                        'INSERT INTO players_turn (game_id, player_id, turn_number) VALUES ($1, $2, 1)',
-                        [game.id, playerId]
-                    );
-                }
-
-                // Fetch message history for the room and send it to the client
-                const messages = await getMessagesFromDB(room, userName);
-                socket.emit('messageHistory', messages);
-
-                // Broadcast that the user has joined the room to all others in the room
-                io.to(room).emit('user_joined', `${userName} has joined the room: ${room}`);
-
-            } catch (error) {
-                console.error('Error in join-room handler:', error);
-            }
-        });
-
-      
         // Handle room creation
         socket.on('createRoom', async (newRoom) => {
             try {
@@ -248,47 +200,6 @@ app.prepare().then(() => {
             }
         });
 
-
-        // // Array to store players waiting for the game
-        // let gameQueue = [];
-
-        // io.on('connection', (socket) => {
-        //     console.log('A player connected:', socket.id);
-
-        //     // Add player to the game queue when they connect
-        //     addToGameQueue(socket);
-
-        //     // Listen for a disconnecting player
-        //     socket.on('disconnect', () => {
-        //         console.log(`Player ${socket.id} disconnected`);
-        //         gameQueue = gameQueue.filter(player => player.id !== socket.id);
-        //         // Emit to the clients that a player left
-        //         io.emit('gameQueueUpdated', gameQueue);
-        //     });
-        // });
-
-        // Function to add player to the game queue
-        // const addToGameQueue = (socket) => {
-        //     // Add the player to the queue
-        //     gameQueue.push({
-        //         id: socket.id,
-        //         username: socket.username || `Player ${gameQueue.length + 1}`, // You can customize this to store player names
-        //     });
-
-        //    // console.log(`Player ${socket.id} added to the queue`);
-
-        //     // Emit the updated game queue to all connected clients
-        //     io.emit('gameQueueUpdated', gameQueue);
-
-        //     // If there are enough players (e.g. 2), start the game
-        //     if (gameQueue.length >= 2) {
-        //         io.emit('startGame', gameQueue);
-        //         // Now you can reset the game queue or do other logic to start the game
-        //         gameQueue = []; // Clear the queue after the game starts
-        //     }
-        // };
-
-
         // Handle leave-room event
         socket.on('leave-room', (room, name) => {
             console.log(`User: ${name}, has left the room: ${room}`);
@@ -296,57 +207,50 @@ app.prepare().then(() => {
             socket.to(room).emit('user_left', `${socket.id} left the room`);
         });
 
-
         // Handle removeRoom event
         socket.on("removeRoom", async (roomToRemove) => {
             console.log(`Removing room: ${roomToRemove}`);
 
             try {
-                // Delete messages from the database for the specified room
                 await client.query('DELETE FROM messages WHERE room_name = $1', [roomToRemove]);
-
-                // Delete the room from the database
                 await client.query('DELETE FROM rooms WHERE name = $1', [roomToRemove]);
-
-                // Emit updated room list to clients
-                io.emit("availableRooms", await getRoomsFromDB()); // Emit updated room list
+        
+                // Emit updated room list to clients after deletion
+                const updatedRooms = await getRoomsFromDB();
+                io.emit("availableRooms", updatedRooms);  // Emit updated room list
             } catch (error) {
                 console.error("Error deleting room and messages:", error);
             }
         });
 
-
         // Handle message event (sending messages in rooms)
+       // Handle message event (sending messages in rooms)
         socket.on('message', async ({ room, message, sender }) => {
-            console.log(`Message from ${sender}: ${message}`);
-            await saveMessageToDatabase(room, message, sender);
-            io.to(room).emit('message', { sender, message });
-        });
-
-        // When the client emits 'roll-dice', handle the dice roll and update DB
-        socket.on('roll-dice', async ({ playerId, currentChips, room }) => {
+            console.log(`Sending message to room: ${room}, Message: ${message}`);
+            console.log(`Message received from ${sender} in room ${room}: ${message}`);
+        
+            // Check for missing data early on
+            if (!room || !message || !sender) {
+            console.error("Missing information in message event.");
+            return;
+            }
+        
             try {
-                // Step 1: Roll the dice
-                const diceResults = rollDice(currentChips); // This would be your dice logic
-
-                // Step 2: Process the dice results (update players, chips, etc.)
-                const updatedPlayers = await processDiceResults(diceResults, playerId, room);
-
-                // Step 3: Update the database with new player states
-                await updatePlayerChips(updatedPlayers);
-
-                // Step 4: Emit the results back to the client
-                io.to(room).emit('gameStateUpdated', updatedPlayers); // Broadcast to room
-
-                // Optionally, emit the dice results for the current player
-                socket.emit('diceResult', diceResults);
+            // Save the message to the database
+            await saveMessageToDatabase(room, sender, message);
+        
+            // Emit the new message to the room
+            io.to(room).emit('newMessage', { sender, message });
             } catch (error) {
-                console.error('Error rolling dice:', error);
-                socket.emit('error', 'An error occurred while processing your turn.');
+            console.error('Error saving message to DB:', error);
             }
         });
-    })
+  
+        
 
+    }); // <-- Closing brace here
+
+    // Start the server
     httpServer.listen(port, '0.0.0.0', () => {
         console.log(`Server listening on http://${hostname}:${port}`);
     });
