@@ -31,7 +31,7 @@ const Nav: React.FC = () => {
   const handleSignOut = async () => {
     try {
       const res = await signOut({ redirect: false });
-      console.log(res)
+      
       if (Boolean(res)) {
         setIsLoggedIn(false);
         localStorage.clear();

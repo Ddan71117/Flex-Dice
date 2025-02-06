@@ -5,10 +5,8 @@ export const authConfig = {
     signIn: '/login',
   },
   callbacks: {
-    async signIn({ user, account, profile, email, credentials }) {
-      // console.log('signIn callback - user:', user);
-      // console.log('signIn callback - account:', account);
-      // console.log('signIn callback - credentials:', credentials);
+    async signIn() {
+      
       return true;
     },
     async jwt({ token, user}) {
@@ -17,20 +15,12 @@ export const authConfig = {
       }
       return token;
     },
-    async session({ session, token, user }) {
-      
-      console.log('session callback - session:', session);
-      console.log('session callback - token:', token);
-      console.log('session callback - user:', user);
-      
-     
+    async session({ session}) {
       
       return session;
     },
     authorized({ auth, request: { nextUrl } }) {
       const isLoggedIn = !!auth?.user;
-      // console.log('auth:', auth)
-      // console.log('nexturl:', nextUrl)
       const isInGame = nextUrl.pathname.startsWith('/game');
       if (isInGame) {
         if (isLoggedIn) return true;

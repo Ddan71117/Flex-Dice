@@ -11,7 +11,8 @@ const Rules = () => {
   });
   const getAuth = async() => {
         const userData = await getSession()
-        console.log('session user data', userData)
+        return userData
+        
 
   }
   useEffect(() => {

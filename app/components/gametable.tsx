@@ -32,7 +32,6 @@ const PokerTable: React.FC<PokerTableProps> = ({ setGameLog }) => {
     "/images/ahsoka.png",
     "/images/bb8.png",
     "/images/c3po.png",
-    "/images/darth_maul.png",
     "/images/orig_yoda.png",
     "/images/red_sith.png",
     "/images/han_solo.png",
