@@ -35,24 +35,7 @@ export default function ChatBox() {
     });
 
     // Listen for incoming messages from the server
-    useEffect(() => {
-    
-      
-      // socket.on('message', ({ sender, message, room }) => {
-      //   console.log(`Received message from ${sender}: ${message}`);
-    
-      //   // Update messages for the specific room
-      //   setMessages((prevMessages) => {
-      //     const roomMessages = prevMessages[room] || [];
-      //     return {
-      //       ...prevMessages,
-      //       [room]: [...roomMessages, { sender, message }],
-      //     };
-      //   });
-      // });
-    
-      // Listen for new messages in the current room
-      socket.on('newMessage', (data) => {
+    socket.on('newMessage', (data) => {
         const { sender, message, room } = data;
         console.log(`New message from ${sender}: ${message}`);
     
@@ -61,18 +44,10 @@ export default function ChatBox() {
           const roomMessages = prevMessages[room] || [];
           return {
             ...prevMessages,
-            [room]: [...roomMessages, { sender, message }],
+            [room]: [...roomMessages, { sender, message }], // Add new message
           };
         });
       });
-    
-      // Cleanup event listeners on component unmount or room change
-      return () => {
-        socket.off('message');
-        socket.off('newMessage');
-      };
-    }, [room]);  // Triggered when the room changes
-    
 
     // Listen for message history when joining a room
     socket.on('messageHistory', (messages, room) => {
@@ -97,16 +72,6 @@ export default function ChatBox() {
         };
       });
     });
-    
-
-
-    //join room
-    socket.emit('join-room', { room: 'roomy mcroom room', userName: 'Ted' });
-    socket.on('message', (data) => {
-      console.log(`Received message from ${data.sender} in room ${data.room}: ${data.message}`);
-      // Handle message rendering here
-    });
-
 
     // Listen for user leaving the room
     socket.on('leave-room', ({ room, userName }) => {
@@ -116,7 +81,7 @@ export default function ChatBox() {
         const roomMessages = prevMessages[room] || [];
         return {
           ...prevMessages,
-          [room]: [...roomMessages, { sender: "system", message: `${userName} left the room.` }],
+          [room]: [...roomMessages, { sender: "system", message: `${userName} left the room.` }], // Adding system message for leaving
         };
       });
     });
@@ -140,8 +105,8 @@ export default function ChatBox() {
       socket.off('newMessage');
       socket.emit('leave-room', { room, userName });
     };
-  }, [room]);
 
+  }, [room]);  // Dependency on room
 
   useEffect(() => {
     const storedUsername = localStorage.getItem("username");
