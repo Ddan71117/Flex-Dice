@@ -33,14 +33,6 @@ const getRoomsFromDB = async () => {
     }
 };
 
-//join room
-const handleJoinRoom = () => {
-    if (room && userName && !joined) {
-      console.log("Emitting join-room", { room, userName }); // Debug log
-      socket.emit("join-room", { room, userName });
-      setJoined(true);
-    }
-  };
 
 // Handle room creation
 const createRoomInDB = async (newRoom) => {
@@ -148,7 +140,7 @@ app.prepare().then(() => {
         },
     });
     io.on('connection', (socket) => {
-        console.log(`A player connected: name`);
+        console.log(`A player connected: ${socket.id}`);
 
         socket.on('roll-dice', async ({ playerId, currentChips, room }) => {
             try {
@@ -169,58 +161,62 @@ app.prepare().then(() => {
             }
         });
 
-        // Handle join-room event
-        socket.on('join-room', async ({ room, name }) => {
-            console.log(`User with chat name ${name} joining room: ${room}`);
-            socket.join(room);
-            io.to(room).emit("user_joined", `${name} joined the room`); // Notify other
+        
+        // Handle the 'join-room' event
+        socket.on('join-room', async ({ room, userName }) => {
+            console.log(`Received join-room event for user: ${userName}, room: ${room}`);  // Log for debugging
+
+            // If userName is undefined, return early
+            if (!userName) {
+                console.error("Error: userName is undefined when joining room");
+                return;
+            }
 
             try {
-                // Get or create the game if it doesn't exist
+                // Ensure the user joins the room
+                socket.join(room);
+                console.log(`${userName} joined the room: ${room}`);
+
+                // Fetch or create the game
                 const game = await createOrGetGame(room);
                 if (!game) {
                     console.error('Game not found!');
                     return;
                 }
 
-                // Check if the player already exists in the players table for this game
-                const checkPlayer = await client.query('SELECT * FROM players WHERE game_id = $1 AND playername = $2', [game.id, name]);
-
-                // If the player doesn't exist, add them to the players table
-                let playerId;
+                // Check if the player already exists in the database for the room/game
+                const checkPlayer = await client.query('SELECT * FROM players WHERE game_id = $1 AND playername = $2', [game.id, userName]);
                 if (checkPlayer.rows.length === 0) {
-                    // Add the player to the database
-                    const res = await client.query('INSERT INTO players (game_id, playername, chips) VALUES ($1, $2, $3) RETURNING *', [game.id, name, 3]); // Initial chips
-                    console.log(`Player added: ${name}`);
-                    playerId = res.rows[0].id;  // Set player ID to the newly inserted player
-                } else {
-                    playerId = checkPlayer.rows[0].id;  // Use the existing player ID
+                    // Add the player if they don't exist in the players table
+                    const res = await client.query('INSERT INTO players (game_id, playername, chips) VALUES ($1, $2, $3) RETURNING *', [game.id, userName, 3]); // Initial chips
+                    console.log(`Player added: ${userName}`);
                 }
 
-                // Insert player’s turn in the players_turn table (only if it’s the first player)
+                // Insert the player’s turn into the players_turn table if it's the first player
+                const playerId = checkPlayer.rows.length === 0 ? res.rows[0].id : checkPlayer.rows[0].id;
                 const currentTurn = await client.query('SELECT * FROM players_turn WHERE game_id = $1 ORDER BY turn_number ASC LIMIT 1', [game.id]);
 
                 if (currentTurn.rows.length === 0) {
-                    // If no player turn records exist, make the current player the first player
+                    // Set the current player as the first player
                     await client.query(
                         'INSERT INTO players_turn (game_id, player_id, turn_number) VALUES ($1, $2, 1)',
                         [game.id, playerId]
                     );
                 }
 
-                // Fetch the message history for the room
-                const messages = await getMessagesFromDB(room); // You don't need to pass `name` to `getMessagesFromDB` in this case
-                socket.emit('messageHistory', messages); // Send message history to the user
+                // Fetch message history for the room and send it to the client
+                const messages = await getMessagesFromDB(room, userName);
+                socket.emit('messageHistory', messages);
 
-                // Broadcast that the user joined the room
-                io.to(room).emit('user_joined', `${name} joined the room`);
+                // Broadcast that the user has joined the room to all others in the room
+                io.to(room).emit('user_joined', `${userName} has joined the room: ${room}`);
 
             } catch (error) {
-                console.error('Error joining room:', error);
-                socket.emit('error', 'An error occurred while joining the room');
+                console.error('Error in join-room handler:', error);
             }
         });
 
+      
         // Handle room creation
         socket.on('createRoom', async (newRoom) => {
             try {
@@ -253,44 +249,44 @@ app.prepare().then(() => {
         });
 
 
-        // Array to store players waiting for the game
-        let gameQueue = [];
+        // // Array to store players waiting for the game
+        // let gameQueue = [];
 
-        io.on('connection', (socket) => {
-            console.log('A player connected:', socket.id);
+        // io.on('connection', (socket) => {
+        //     console.log('A player connected:', socket.id);
 
-            // Add player to the game queue when they connect
-            addToGameQueue(socket);
+        //     // Add player to the game queue when they connect
+        //     addToGameQueue(socket);
 
-            // Listen for a disconnecting player
-            socket.on('disconnect', () => {
-                console.log(`Player ${socket.id} disconnected`);
-                gameQueue = gameQueue.filter(player => player.id !== socket.id);
-                // Emit to the clients that a player left
-                io.emit('gameQueueUpdated', gameQueue);
-            });
-        });
+        //     // Listen for a disconnecting player
+        //     socket.on('disconnect', () => {
+        //         console.log(`Player ${socket.id} disconnected`);
+        //         gameQueue = gameQueue.filter(player => player.id !== socket.id);
+        //         // Emit to the clients that a player left
+        //         io.emit('gameQueueUpdated', gameQueue);
+        //     });
+        // });
 
         // Function to add player to the game queue
-        const addToGameQueue = (socket) => {
-            // Add the player to the queue
-            gameQueue.push({
-                id: socket.id,
-                username: socket.username || `Player ${gameQueue.length + 1}`, // You can customize this to store player names
-            });
+        // const addToGameQueue = (socket) => {
+        //     // Add the player to the queue
+        //     gameQueue.push({
+        //         id: socket.id,
+        //         username: socket.username || `Player ${gameQueue.length + 1}`, // You can customize this to store player names
+        //     });
 
-            console.log(`Player ${socket.id} added to the queue`);
+        //    // console.log(`Player ${socket.id} added to the queue`);
 
-            // Emit the updated game queue to all connected clients
-            io.emit('gameQueueUpdated', gameQueue);
+        //     // Emit the updated game queue to all connected clients
+        //     io.emit('gameQueueUpdated', gameQueue);
 
-            // If there are enough players (e.g. 2), start the game
-            if (gameQueue.length >= 2) {
-                io.emit('startGame', gameQueue);
-                // Now you can reset the game queue or do other logic to start the game
-                gameQueue = []; // Clear the queue after the game starts
-            }
-        };
+        //     // If there are enough players (e.g. 2), start the game
+        //     if (gameQueue.length >= 2) {
+        //         io.emit('startGame', gameQueue);
+        //         // Now you can reset the game queue or do other logic to start the game
+        //         gameQueue = []; // Clear the queue after the game starts
+        //     }
+        // };
 
 
         // Handle leave-room event
