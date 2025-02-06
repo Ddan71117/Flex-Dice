@@ -13,75 +13,107 @@ export default function ChatBox() {
   const [userName, setUserName] = useState("");
   const [joined, setJoined] = useState(false);
   const [messages, setMessages] = useState<
-    { sender: string; message: string }[]
-  >([]);
+    { [room: string]: { sender: string; message: string }[] }
+  >({});
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // fetchUser();  // Fetch user data when component mounts
+
 
   // Fetch available rooms when the component mounts
   useEffect(() => {
+    // Connect to the server
     socket.on('connect', () => {
       console.log('Connected to server');
-  });
+    });
 
+    // Emit to get available rooms when the component mounts
     socket.emit("get-available-rooms");
 
-    // Listen for updates to the available rooms
+    // Listen for updates to available rooms
     socket.on("availableRooms", (rooms: string[]) => {
       setRooms(rooms);
     });
 
-    socket.on('message', ({ sender, message }) => {
+    // Listen for incoming messages from the server
+    socket.on('message', ({ sender, message, room }) => {
       console.log(`Received message from ${sender}: ${message}`);
-      setMessages((prev) => [...prev, { sender, message }]);
+
+      // Update messages for the specific room
+      setMessages((prevMessages) => {
+        const roomMessages = prevMessages[room] || [];
+        return {
+          ...prevMessages,
+          [room]: [...roomMessages, { sender, message }],
+        };
+      });
     });
 
-    // On the client side, listen for the message history event
-    socket.on('messageHistory', (messages) => {
-      console.log('Message history:', messages);
-      setMessages(messages);
-      // Display the messages to the UI (e.g., render them in the chat window)
+    // Listen for message history when joining a room
+    socket.on('messageHistory', (messages, room) => {
+      console.log('Message history:', messages, room);
+
+      setMessages((prevMessages) => ({
+        ...prevMessages,
+        [room]: messages, // Update the messages for the specific room
+      }));
     });
 
-    socket.on('join-room', ({ room, userName }) => {
-      console.log(`User ${userName} joined room ${room}`);
-      setMessages((prev) => [
-        ...prev,
-        { sender: "system", message: `${userName} joined the room.` },
-      ]);
+    // Listen for user joined event
+    socket.on('user_joined', (message, room) => {
+      console.log('User joined:', message);
+  
+      // Update messages for the specific room when a user joins
+      setMessages((prevMessages) => {
+        const roomMessages = prevMessages[room] || [];
+        return {
+          ...prevMessages,
+          [room]: [...roomMessages, { sender: "system", message }],  // Adding the "system" message for user join
+        };
+      });
     });
     
+
+
+    //join room
+    socket.emit('join-room', { room: 'roomy mcroom room', userName: 'Ted' });
+    socket.on('message', (data) => {
+      console.log(`Received message from ${data.sender} in room ${data.room}: ${data.message}`);
+      // Handle message rendering here
+    });
+
+
+    // Listen for user leaving the room
     socket.on('leave-room', ({ room, userName }) => {
       console.log(`User ${userName} left room ${room}`);
-      setMessages((prev) => [
-        ...prev,
-        { sender: "system", message: `${userName} left the room.` },
-      ]);
+
+      setMessages((prevMessages) => {
+        const roomMessages = prevMessages[room] || [];
+        return {
+          ...prevMessages,
+          [room]: [...roomMessages, { sender: "system", message: `${userName} left the room.` }],
+        };
+      });
     });
 
-    socket.on("user_joined", (message) => {
-      console.log("User joined event received:", message);
-      setMessages((prev) => [...prev, { sender: "system", message }]);
-    });
-    
+    // Disconnect event
     socket.on('disconnect', () => {
       console.log('Disconnected from server');
     });
-  
 
     // Cleanup listeners on unmount
     return () => {
       socket.off('connect');
-      socket.off('disconnect');
       socket.off("availableRooms");
+      socket.off("join-room");
+      socket.off("user_joined");
       socket.off("message");
       socket.off("user_joined");
       socket.off("messageHistory");
-      socket.off("join-room");
       socket.off("leave-room");
+      socket.off('disconnect');
     };
   }, []);
+
 
   useEffect(() => {
     const storedUsername = localStorage.getItem("username");
@@ -98,19 +130,34 @@ export default function ChatBox() {
       setJoined(true);
     }
   };
-  
+
   // //handle receiving messages
   // const handleReceiveMessage = (message: string) => {
   //   socket.emit("message", message);
   // };
 
   // Send message logic
-  const handleSendMessage = (message: string) => {
+  const handleSendMessage = (message: any) => {
+    if (!room || !userName) {
+      console.error("Room or UserName is missing");
+      return;
+    }
+    
     const data = { room, message, sender: userName };
-    setMessages((prev) => [...prev, { sender: userName, message }]);
-    socket.emit("message", data);
+    
+    // Save message locally
+    setMessages((prev) => {
+      const roomMessages = prev[room] || [];
+      return {
+        ...prev,
+        [room]: [...roomMessages, { sender: userName, message }],
+      };
+    });
+  
+    // Emit message to the server
+    socket.emit('message', data);
   };
-
+  
   // Select a room from the list
   const handleSelectRoom = (selectedRoom: string) => {
     setRoom(selectedRoom);
@@ -180,8 +227,8 @@ export default function ChatBox() {
                         <button
                           onClick={() => handleSelectRoom(availableRoom)}
                           className={`text-base ${room === availableRoom
-                              ? "bg-blue-500 text-white"
-                              : "text-blue-500"
+                            ? "bg-blue-500 text-white"
+                            : "text-blue-500"
                             } p-2 rounded-lg`}
                         >
                           {availableRoom}
@@ -230,7 +277,7 @@ export default function ChatBox() {
                 </h1>
                 <div className="h-[200px] overflow-y-auto p-4 mb-4 bg-gray-200 border-2 text-black rounded-lg">
                   <div>
-                    {messages.map((msg, index) => (
+                    {messages[room]?.map((msg, index) => (
                       <ChatMessage
                         key={index}
                         sender={msg.sender}
