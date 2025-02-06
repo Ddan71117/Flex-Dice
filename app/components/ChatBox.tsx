@@ -35,18 +35,43 @@ export default function ChatBox() {
     });
 
     // Listen for incoming messages from the server
-    socket.on('message', ({ sender, message, room }) => {
-      console.log(`Received message from ${sender}: ${message}`);
-
-      // Update messages for the specific room
-      setMessages((prevMessages) => {
-        const roomMessages = prevMessages[room] || [];
-        return {
-          ...prevMessages,
-          [room]: [...roomMessages, { sender, message }],
-        };
+    useEffect(() => {
+      // Listen for messages from the server (e.g., history or initial messages)
+      // socket.on('message', ({ sender, message, room }) => {
+      //   console.log(`Received message from ${sender}: ${message}`);
+    
+      //   // Update messages for the specific room
+      //   setMessages((prevMessages) => {
+      //     const roomMessages = prevMessages[room] || [];
+      //     return {
+      //       ...prevMessages,
+      //       [room]: [...roomMessages, { sender, message }],
+      //     };
+      //   });
+      // });
+    
+      // Listen for new messages in the current room
+      socket.on('newMessage', (data) => {
+        const { sender, message, room } = data;
+        console.log(`New message from ${sender}: ${message}`);
+    
+        // Update the state to add the new message to the current room's message list
+        setMessages((prevMessages) => {
+          const roomMessages = prevMessages[room] || [];
+          return {
+            ...prevMessages,
+            [room]: [...roomMessages, { sender, message }],
+          };
+        });
       });
-    });
+    
+      // Cleanup event listeners on component unmount or room change
+      return () => {
+        socket.off('message');
+        socket.off('newMessage');
+      };
+    }, [room]);  // Triggered when the room changes
+    
 
     // Listen for message history when joining a room
     socket.on('messageHistory', (messages, room) => {
@@ -111,8 +136,10 @@ export default function ChatBox() {
       socket.off("messageHistory");
       socket.off("leave-room");
       socket.off('disconnect');
+      socket.off('newMessage');
+      socket.emit('leave-room', { room, userName });
     };
-  }, []);
+  }, [room]);
 
 
   useEffect(() => {
@@ -123,14 +150,30 @@ export default function ChatBox() {
   }, []);
 
   // Join room logic
-  const handleJoinRoom = () => {
-    if (room && userName && !joined) {
-      console.log("Emitting join-room", { room, userName }); // Debug log
-      socket.emit("join-room", { room, userName });
-      setJoined(true);
+  // const handleJoinRoom = () => {
+  //   if (room && userName && !joined) {
+  //     console.log("Emitting join-room", { room, userName }); // Debug log
+  //     socket.emit("join-room", { room, userName });
+  //     setJoined(true);
+  //   }
+  // };
+  const handleJoinRoom = (room: any) => {
+    if (!userName) {
+      console.error("UserName is missing!");
+      return;
     }
+  
+    socket.emit('join-room', { room, userName });
+  
+    // After joining, fetch the room's message history
+    socket.on('messageHistory', (messages) => {
+      setMessages((prev) => ({
+        ...prev,
+        [room]: messages,
+      }));
+    });
   };
-
+  
   // //handle receiving messages
   // const handleReceiveMessage = (message: string) => {
   //   socket.emit("message", message);
