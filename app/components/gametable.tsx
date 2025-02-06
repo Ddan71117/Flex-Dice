@@ -8,7 +8,7 @@ type PokerTableProps = {
 
 const resetGame = () => {
   window.location.reload();
-}
+};
 
 const PokerTable: React.FC<PokerTableProps> = ({ setGameLog }) => {
   const {
@@ -23,26 +23,28 @@ const PokerTable: React.FC<PokerTableProps> = ({ setGameLog }) => {
   } = Game(setGameLog);
 
   const [displayedDice, setDisplayedDice] = useState<string[]>([]);
-  const [userAvatar, setUserAvatar] = useState<string>(""); 
-  const [playerAvatars, setPlayerAvatars] = useState<{ [key: number]: string }>({}); 
+  const [userAvatar, setUserAvatar] = useState<string>("");
+  const [playerAvatars, setPlayerAvatars] = useState<{ [key: number]: string }>(
+    {}
+  );
 
   const availableAvatars = [
-    '/images/ahsoka.png',
-    '/images/bb8.png',
-    '/images/c3po.png',
-    '/images/darth_maul.png',
-    '/images/orig_yoda.png',
-    '/images/red_sith.png',
-    '/images/han_solo.png',
-    '/images/luke.png',
+    "/images/ahsoka.png",
+    "/images/bb8.png",
+    "/images/c3po.png",
+    "/images/darth_maul.png",
+    "/images/orig_yoda.png",
+    "/images/red_sith.png",
+    "/images/han_solo.png",
+    "/images/luke.png",
   ];
 
   const diceImages: { [key: string]: string } = {
-    'L': "/images/dice3.png",
-    'R': "/images/dice4.png",
-    'C': "/images/dice2.png",
-    '•': "/images/dice1.png",
-    'default': "/images/dice1.png"
+    L: "/images/dice3.png",
+    R: "/images/dice4.png",
+    C: "/images/dice2.png",
+    "•": "/images/dice1.png",
+    default: "/images/dice1.png",
   };
 
   const getDiceImage = (diceValue: string): string => {
@@ -75,7 +77,6 @@ const PokerTable: React.FC<PokerTableProps> = ({ setGameLog }) => {
     });
 
     setPlayerAvatars(avatars);
-
   }, [players, user.id]);
 
   const getChipStackImage = (chips: number): string => {
@@ -93,28 +94,29 @@ const PokerTable: React.FC<PokerTableProps> = ({ setGameLog }) => {
     const animate = () => {
       if (animationFrames >= maxFrames) {
         const results = players[currentPlayerIndex].diceResult || [];
-        const resultImages = results.map(result => getDiceImage(result));
+        const resultImages = results.map((result) => getDiceImage(result));
         setDisplayedDice(resultImages);
-        
+
         setGameState((prev) => ({
           ...prev,
           isRolling: false,
           isProcessingResults: true,
         }));
-        
+
         processResults(results, currentPlayerIndex);
-        setGameLog((log) => [
-          ...log,
-          `Player ${players[currentPlayerIndex].id} rolled: ${results.join(" ")}`,
-        ]);
         return;
       }
 
-      const randomDice = Array(currentDiceCount).fill(null).map(() => {
-        const diceKeys = Object.keys(diceImages).filter(key => key !== 'default');
-        const randomKey = diceKeys[Math.floor(Math.random() * diceKeys.length)];
-        return getDiceImage(randomKey);
-      });
+      const randomDice = Array(currentDiceCount)
+        .fill(null)
+        .map(() => {
+          const diceKeys = Object.keys(diceImages).filter(
+            (key) => key !== "default"
+          );
+          const randomKey =
+            diceKeys[Math.floor(Math.random() * diceKeys.length)];
+          return getDiceImage(randomKey);
+        });
 
       setDisplayedDice(randomDice);
       animationFrames++;
@@ -135,11 +137,11 @@ const PokerTable: React.FC<PokerTableProps> = ({ setGameLog }) => {
   };
 
   const playerPositions = [
-    { top: '5%', left: '42%', transform: '-translate-x-1/2' },     // You (top)
-    { top: '30%', right: '10%' },                                  // Player 2 (top right)
-    { top: '70%', right: '10%' },                                  // Player 3 (bottom right)
-    { top: '70%', left: '10%' },                                   // Player 4 (bottom left)
-    { top: '30%', left: '10%' },                                   // Player 5 (top left)
+    { top: "5%", left: "42%", transform: "-translate-x-1/2" }, // You (top)
+    { top: "30%", right: "10%" }, // Player 2 (top right)
+    { top: "70%", right: "10%" }, // Player 3 (bottom right)
+    { top: "70%", left: "10%" }, // Player 4 (bottom left)
+    { top: "30%", left: "10%" }, // Player 5 (top left)
   ];
 
   const centerPot = players.find((p) => p.id === 0)?.chips || 0;
@@ -148,37 +150,40 @@ const PokerTable: React.FC<PokerTableProps> = ({ setGameLog }) => {
     const isUserWinner = parseInt(user.id || "0") === winner;
     return {
       title: isUserWinner ? "You Win!" : `Player ${winner} Wins!`,
-      subtitle: isUserWinner ? "Test your luck one more time?" : "Better luck next time!"
+      subtitle: isUserWinner
+        ? "Test your luck one more time?"
+        : "Better luck next time!",
     };
   };
 
   return (
     <div className="fixed inset-0 flex items-center justify-center mt-20">
       <div className="relative w-full max-w-4xl mx-auto mt-16">
-        <img 
-          src="/images/poker_table.png" 
-          alt="Poker Table" 
+        <img
+          src="/images/poker_table.png"
+          alt="Poker Table"
           className="w-full"
         />
 
         {players.slice(0, 5).map((player, index) => (
           <div
             key={`${player.id}-${index}`}
-            className={`absolute ${index === currentPlayerIndex && !gameState.isRolling
+            className={`absolute ${
+              index === currentPlayerIndex && !gameState.isRolling
                 ? "border-4 border-yellow-400 p-2 rounded-full animate-pulse ring-4 ring-yellow-500 transition-all duration-500"
                 : ""
-              }`}
+            }`}
             style={{
               ...playerPositions[index],
-              transform: playerPositions[index].transform || 'none',
+              transform: playerPositions[index].transform || "none",
             }}
           >
             <div className="flex flex-col items-center">
               {player.id === parseInt(user.id || "0") ? (
                 <div className="w-12 h-12 flex items-center justify-center bg-blue-500 text-white font-bold rounded-full shadow-lg border-4 border-white">
-                   <img
+                  <img
                     src={userAvatar}
-                    alt='YOU'
+                    alt="YOU"
                     width={85}
                     height={85}
                     className="w-16 h-16 rounded-full shadow-lg"
@@ -204,9 +209,18 @@ const PokerTable: React.FC<PokerTableProps> = ({ setGameLog }) => {
                 />
               )}
 
-              <div className="bg-black bg-opacity-50 px-2 py-2 rounded-full flex items-center space-x-2">
-                <p className={`text-center mt-4 ${player.id === parseInt(user.id || "0") ? "text-blue-400 font-bold" : "text-white"}`}>
-                  {player.id === parseInt(user.id || "0") ? user.username || "You" : `Player ${player.id}`} : {player.chips} chip{player.chips !== 1 ? 's' : ''}
+              <div className="bg-black bg-opacity-50 px-4 py-2 rounded-full flex items-center space-x-2">
+                <p
+                  className={`text-center mt-4 ${
+                    player.id === parseInt(user.id || "0")
+                      ? "text-blue-400 font-bold"
+                      : "text-white"
+                  }`}
+                >
+                  {player.id === parseInt(user.id || "0")
+                    ? user.username || "You"
+                    : `Player ${player.id}`}{" "}
+                  : {player.chips} chip{player.chips !== 1 ? "s" : ""}
                 </p>
               </div>
             </div>
@@ -220,7 +234,9 @@ const PokerTable: React.FC<PokerTableProps> = ({ setGameLog }) => {
                 key={`dice-${index}-${dice}`}
                 src={dice}
                 alt={`Dice ${index + 1}`}
-                className={`w-12 h-12 ${gameState.isRolling ? "animate-bounce" : ""}`}
+                className={`w-12 h-12 ${
+                  gameState.isRolling ? "animate-bounce" : ""
+                }`}
                 onError={(e) => {
                   const target = e.target as HTMLImageElement;
                   target.src = diceImages.default;
@@ -228,24 +244,26 @@ const PokerTable: React.FC<PokerTableProps> = ({ setGameLog }) => {
               />
             ))}
           </div>
-          
+
           {centerPot > 0 && (
             <div className="bg-black bg-opacity-50 px-4 py-2 rounded-full flex items-center space-x-2 mb-4">
-              <img 
+              <img
                 src={getChipStackImage(centerPot)}
                 alt={`${centerPot} chips`}
                 className="w-6 h-6"
               />
               <p className="text-white font-bold text-lg">
-                Center Pot: {centerPot} chip{centerPot !== 1 ? 's' : ''}
+                Center Pot: {centerPot} chip{centerPot !== 1 ? "s" : ""}
               </p>
             </div>
           )}
 
           {!winner ? (
-            players[currentPlayerIndex].id === parseInt(user.id || "0") && !gameState.isRolling && !gameState.isProcessingResults && (
-              <button 
-                onClick={onTurnClick} 
+            players[currentPlayerIndex].id === parseInt(user.id || "0") &&
+            !gameState.isRolling &&
+            !gameState.isProcessingResults && (
+              <button
+                onClick={onTurnClick}
                 className="relative group px-8 py-4 bg-gradient-to-r from-purple-600 to-blue-500 text-white text-lg font-bold rounded-xl 
                           shadow-lg hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-200
                           border-2 border-white/20 backdrop-blur-sm
