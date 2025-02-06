@@ -8,6 +8,7 @@ import "../globals.css";
 
 export default function ChatBox() {
   const [room, setRoom] = useState("");
+  const [tempRoom, setTempRoom] = useState(""); 
   const [newMessage, setNewMessage] = useState("");
   const [rooms, setRooms] = useState<string[]>([]);
   const [userName, setUserName] = useState("");
@@ -17,15 +18,29 @@ export default function ChatBox() {
   }>({});
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [isCreating, setIsCreating] = useState(false);
 
+  // const handleRoomInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   console.log("Room name:", e.target.value);
+  //   setRoom(e.target.value);  // Update room state as user types
+  // };
+
+
+
+   
   // Connect to the server and listen for events
   useEffect(() => {
-    // Connect to the server
     socket.on("connect", () => {
       console.log("Connected to server");
     });
+  
+    return () => {
+      socket.off("connect");
+    };
+  }, []);
 
-    // Emit to get available rooms when the component mounts
+  useEffect(() => {
+       // Emit to get available rooms when the component mounts
     socket.emit("get-available-rooms");
 
     // Listen for updates to available rooms
@@ -64,7 +79,7 @@ export default function ChatBox() {
 
     // Cleanup listeners on unmount
     return () => {
-      socket.off("connect");
+      
       socket.off("availableRooms");
       socket.off("user_joined");
       socket.off("leave-room");
@@ -84,24 +99,33 @@ export default function ChatBox() {
 
   // Handle incoming messages from the server
   useEffect(() => {
+    // Listen for incoming new messages
     const handleNewMessage = ({ sender, message, room }: { sender: string; message: string; room: string }) => {
       console.log(`New message from ${sender}: ${message}`);
+  
       setMessages((prevMessages) => {
         const roomMessages = prevMessages[room] || [];
+  
+        // Prevent adding the same message if it was already optimistically added
+        if (roomMessages.find((msg) => msg.message === message && msg.sender === sender)) {
+          return prevMessages;
+        }
+  
         return {
           ...prevMessages,
           [room]: [...roomMessages, { sender, message }],
         };
       });
     };
-
-    socket.on("newMessage", handleNewMessage);
-
-    // Cleanup listener when the component unmounts
+  
+    socket.on('newMessage', handleNewMessage);
+  
+    // Cleanup listener on unmount
     return () => {
-      socket.off("newMessage", handleNewMessage);
+      socket.off('newMessage', handleNewMessage);
     };
   }, []);
+  
 
   // Handle room joining and message history
   useEffect(() => {
@@ -138,38 +162,66 @@ export default function ChatBox() {
     }
   }, [userName]);
 
+  useEffect(() => {
+    // Listen for the 'createRoom' response from the server
+    socket.on('createRoomResponse', (response) => {
+      if (response.success) {
+        console.log(`Room created successfully: ${response.room}`);
+        // Handle success, e.g., navigate to the new room or show a success message
+        setRooms((prevRooms) => [...prevRooms, response.room]); 
+      } else {
+        console.error(`Failed to create room: ${response.error}`);
+        // Handle error, e.g., show an error message to the user
+      }
+    });
+
+    // Cleanup the event listener on unmount
+    return () => {
+      socket.off('createRoomResponse');
+    };
+  }, []);
+
   // Send message logic
   const handleSendMessage = (message: any) => {
     if (!room || !userName) {
       console.error("Room or UserName is missing");
       return;
     }
-
     const data = { room, message, sender: userName };
+    // Emit message to the server
+    socket.emit("message", data);
+    // Optimistic update (if you want it)
+    setMessages((prevMessages) => {
+      const roomMessages = prevMessages[room] || [];
 
-    // Save message locally (optimistic UI update)
-    setMessages((prev) => {
-      const roomMessages = prev[room] || [];
+      // Prevent adding the same message twice (you can add extra checks here if necessary)
+      if (roomMessages.find((msg) => msg.message === message && msg.sender === userName)) {
+        return prevMessages;
+      }
+
       return {
-        ...prev,
+        ...prevMessages,
         [room]: [...roomMessages, { sender: userName, message }],
       };
     });
-
-    // Emit message to the server
-    socket.emit("message", data);
+  };
+//testing this out 
+  const handleCreateRoom = () => {
+    if (tempRoom.trim().length < 2) {
+      console.error("Room name should be at least 2 characters long.");
+      return;
+    }
+    socket.emit("createRoom", tempRoom);
+    setTempRoom(""); // Clear the input field after emitting the event
+  
+    setIsCreating(false); 
   };
 
   const handleSelectRoom = (selectedRoom: string) => {
     setRoom(selectedRoom);
   };
 
-  const handleCreateRoom = () => {
-    if (room) {
-      socket.emit("createRoom", room); // Emit the new room to the server
-      setRoom(""); // Clear the input field
-    }
-  };
+
 
   const handleLeaveRoom = () => {
     socket.emit("leave-room", room); // Handle leaving a room
@@ -205,6 +257,13 @@ export default function ChatBox() {
     return <div>Loading...</div>; // Optionally show a loading indicator
   }
 
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    e.preventDefault();
+    console.log("Room input value changed:", e.target.value);
+    setRoom(e.target.value);
+  };
+
+  
   return (
     <div>
       <button
@@ -253,8 +312,8 @@ export default function ChatBox() {
                   <input
                     type="text"
                     placeholder="Enter new room name"
-                    value={room}
-                    onChange={(e) => setRoom(e.target.value)}
+                    value={tempRoom}
+                    onChange={(e) => setTempRoom(e.target.value)}
                     className="w-42 h-10 px-4 py-2 mb-4 border-2 text-black text-xs placeholder-gray-800 rounded-lg"
                   />
                   <button
