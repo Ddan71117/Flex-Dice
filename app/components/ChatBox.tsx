@@ -12,63 +12,92 @@ export default function ChatBox() {
   const [rooms, setRooms] = useState<string[]>([]);
   const [userName, setUserName] = useState("");
   const [joined, setJoined] = useState(false);
-  const [messages, setMessages] = useState<
-    { sender: string; message: string }[]
-  >([]);
+  //const [messages, setMessages] = useState<{ sender: string; message: string }[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [currentRoom, setCurrentRoom] = useState("");
+  const [messages, setMessages] = useState<{ [key: string]: { sender: string; message: string }[] }>({}); // Messages are stored per room
 
-  // fetchUser();  // Fetch user data when component mounts
 
-  // Fetch available rooms when the component mounts
   useEffect(() => {
+    // Connected to the server
     socket.on('connect', () => {
       console.log('Connected to server');
-  });
-
+    });
     socket.emit("get-available-rooms");
 
-    // Listen for updates to the available rooms
+    // Emit to get available rooms when component mounts
     socket.on("availableRooms", (rooms: string[]) => {
       setRooms(rooms);
     });
 
-    socket.on('message', ({ sender, message }) => {
-      console.log(`Received message from ${sender}: ${message}`);
-      setMessages((prev) => [...prev, { sender, message }]);
+    // Listen for messages and update state only for the current room
+    socket.on('message', ({ room, sender, message }) => {
+      console.log(`Received message from ${sender} in room ${room}: ${message}`);
+
+      if (room === currentRoom) { // Only update messages for the current room
+        setMessages((prevMessages) => {
+          const roomMessages = prevMessages[room] || []; // Initialize an empty array if room doesn't exist yet
+          return {
+            ...prevMessages,
+            [room]: [...roomMessages, { sender, message }], // Add the new message to the room's message list
+          };
+        });
+      }
     });
 
-    // On the client side, listen for the message history event
-    socket.on('messageHistory', (messages) => {
-      console.log('Message history:', messages);
-      setMessages(messages);
-      // Display the messages to the UI (e.g., render them in the chat window)
+
+    // Message history from the server (on joining a room)
+    socket.on('messageHistory', (room, messages) => {
+      console.log('Message history for ${room}:', messages);
+      setMessages((prevMessages) => ({
+        ...prevMessages,
+        [room]: messages, // Update message history for the specific room
+      }));
     });
 
+    // User join/leave system messages (either join-room or leave-room)
     socket.on('join-room', ({ room, userName }) => {
       console.log(`User ${userName} joined room ${room}`);
-      setMessages((prev) => [
-        ...prev,
-        { sender: "system", message: `${userName} joined the room.` },
-      ]);
-    });
-    
-    socket.on('leave-room', ({ room, userName }) => {
-      console.log(`User ${userName} left room ${room}`);
-      setMessages((prev) => [
-        ...prev,
-        { sender: "system", message: `${userName} left the room.` },
-      ]);
+      setMessages((prevMessages) => ({
+        ...prevMessages,
+        [room]: [
+          ...(prevMessages[room] || []),
+          { sender: "system", message: `${userName} joined the room.` },
+        ],
+      }));
     });
 
+    socket.on('leave-room', ({ room, userName }) => {
+      console.log(`User ${userName} left room ${room}`);
+      setMessages((prevMessages) => ({
+        ...prevMessages,
+        [room]: [
+          ...(prevMessages[room] || []), // Get the existing messages for the room or use an empty array
+          { sender: "system", message: `${userName} left the room.` },
+        ],
+      }));
+    });
+
+
+    // User joined event handling (if you need this separately)
     socket.on("user_joined", (message) => {
       console.log("User joined event received:", message);
-      setMessages((prev) => [...prev, { sender: "system", message }]);
+      setMessages((prevMessages) => {
+        // Ensure that currentRoom exists in prevMessages, or initialize it as an empty array
+        const roomMessages = prevMessages[currentRoom] || [];
+
+        // Return updated state by adding the new message for the specific room
+        return {
+          ...prevMessages, // spread the previous state
+          [currentRoom]: [...roomMessages, { sender: "system", message }], // add the new system message
+        };
+      });
     });
-    
+
+    // Disconnect event
     socket.on('disconnect', () => {
       console.log('Disconnected from server');
     });
-  
 
     // Cleanup listeners on unmount
     return () => {
@@ -76,12 +105,13 @@ export default function ChatBox() {
       socket.off('disconnect');
       socket.off("availableRooms");
       socket.off("message");
-      socket.off("user_joined");
       socket.off("messageHistory");
       socket.off("join-room");
       socket.off("leave-room");
+      socket.off("user_joined");
     };
-  }, []);
+  }, [userName]);
+
 
   useEffect(() => {
     const storedUsername = localStorage.getItem("username");
@@ -98,7 +128,7 @@ export default function ChatBox() {
       setJoined(true);
     }
   };
-  
+
   // //handle receiving messages
   // const handleReceiveMessage = (message: string) => {
   //   socket.emit("message", message);
@@ -106,8 +136,19 @@ export default function ChatBox() {
 
   // Send message logic
   const handleSendMessage = (message: string) => {
+    // Data to send to the server
     const data = { room, message, sender: userName };
-    setMessages((prev) => [...prev, { sender: userName, message }]);
+
+    // Add the message to the UI state (only for the sender)
+    setMessages((prevMessages) => {
+      const roomMessages = prevMessages[room] || [];
+      return {
+        ...prevMessages, // Retain previous messages for all rooms
+        [room]: [...roomMessages, { sender: userName, message }], // Add new message to the current room
+      };
+    });
+
+    // Emit the message to the server for broadcasting
     socket.emit("message", data);
   };
 
@@ -147,6 +188,8 @@ export default function ChatBox() {
     setIsModalOpen(false);
   };
 
+  const roomMessages = messages[currentRoom] || [];
+
   return (
     <div>
       {/* Button to open the chat modal positioned at the lower-right */}
@@ -180,8 +223,8 @@ export default function ChatBox() {
                         <button
                           onClick={() => handleSelectRoom(availableRoom)}
                           className={`text-base ${room === availableRoom
-                              ? "bg-blue-500 text-white"
-                              : "text-blue-500"
+                            ? "bg-blue-500 text-white"
+                            : "text-blue-500"
                             } p-2 rounded-lg`}
                         >
                           {availableRoom}
@@ -230,7 +273,7 @@ export default function ChatBox() {
                 </h1>
                 <div className="h-[200px] overflow-y-auto p-4 mb-4 bg-gray-200 border-2 text-black rounded-lg">
                   <div>
-                    {messages.map((msg, index) => (
+                    {(messages[room] || []).map((msg, index) => (
                       <ChatMessage
                         key={index}
                         sender={msg.sender}
