@@ -204,7 +204,7 @@ const PokerTable: React.FC<PokerTableProps> = ({ setGameLog }) => {
                 />
               )}
 
-              <div className="bg-black bg-opacity-50 px-4 py-2 rounded-full flex items-center space-x-2">
+              <div className="bg-black bg-opacity-50 px-2 py-2 rounded-full flex items-center space-x-2">
                 <p className={`text-center mt-4 ${player.id === parseInt(user.id || "0") ? "text-blue-400 font-bold" : "text-white"}`}>
                   {player.id === parseInt(user.id || "0") ? user.username || "You" : `Player ${player.id}`} : {player.chips} chip{player.chips !== 1 ? 's' : ''}
                 </p>
