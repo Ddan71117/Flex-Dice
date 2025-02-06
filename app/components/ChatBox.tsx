@@ -8,7 +8,7 @@ import "../globals.css";
 
 export default function ChatBox() {
   const [room, setRoom] = useState("");
-
+  const [newMessage, setNewMessage] = useState('');
   const [rooms, setRooms] = useState<string[]>([]);
   const [userName, setUserName] = useState("");
   const [joined, setJoined] = useState(false);
@@ -21,6 +21,10 @@ export default function ChatBox() {
 
   // Fetch available rooms when the component mounts
   useEffect(() => {
+    socket.on('connect', () => {
+      console.log('Connected to server');
+  });
+
     socket.emit("get-available-rooms");
 
     // Listen for updates to the available rooms
@@ -28,19 +32,54 @@ export default function ChatBox() {
       setRooms(rooms);
     });
 
-    socket.on("message", (data) => {
-      setMessages((prev) => [...prev, data]);
+    socket.on('message', ({ sender, message }) => {
+      console.log(`Received message from ${sender}: ${message}`);
+      setMessages((prev) => [...prev, { sender, message }]);
     });
 
-    socket.on("user_joined", (message: string) => {
+    // On the client side, listen for the message history event
+    socket.on('messageHistory', (messages) => {
+      console.log('Message history:', messages);
+      setMessages(messages);
+      // Display the messages to the UI (e.g., render them in the chat window)
+    });
+
+    socket.on('join-room', ({ room, userName }) => {
+      console.log(`User ${userName} joined room ${room}`);
+      setMessages((prev) => [
+        ...prev,
+        { sender: "system", message: `${userName} joined the room.` },
+      ]);
+    });
+    
+    socket.on('leave-room', ({ room, userName }) => {
+      console.log(`User ${userName} left room ${room}`);
+      setMessages((prev) => [
+        ...prev,
+        { sender: "system", message: `${userName} left the room.` },
+      ]);
+    });
+
+    socket.on("user_joined", (message) => {
+      console.log("User joined event received:", message);
       setMessages((prev) => [...prev, { sender: "system", message }]);
     });
+    
+    socket.on('disconnect', () => {
+      console.log('Disconnected from server');
+    });
+  
 
     // Cleanup listeners on unmount
     return () => {
+      socket.off('connect');
+      socket.off('disconnect');
       socket.off("availableRooms");
       socket.off("message");
       socket.off("user_joined");
+      socket.off("messageHistory");
+      socket.off("join-room");
+      socket.off("leave-room");
     };
   }, []);
 
@@ -53,11 +92,17 @@ export default function ChatBox() {
 
   // Join room logic
   const handleJoinRoom = () => {
-    if (room && userName) {
-      //socket.emit("join-room", { room, userName });
+    if (room && userName && !joined) {
+      console.log("Emitting join-room", { room, userName }); // Debug log
+      socket.emit("join-room", { room, userName });
       setJoined(true);
     }
   };
+  
+  // //handle receiving messages
+  // const handleReceiveMessage = (message: string) => {
+  //   socket.emit("message", message);
+  // };
 
   // Send message logic
   const handleSendMessage = (message: string) => {
@@ -134,11 +179,10 @@ export default function ChatBox() {
                       <li key={availableRoom} className="mt-2">
                         <button
                           onClick={() => handleSelectRoom(availableRoom)}
-                          className={`text-base ${
-                            room === availableRoom
+                          className={`text-base ${room === availableRoom
                               ? "bg-blue-500 text-white"
                               : "text-blue-500"
-                          } p-2 rounded-lg`}
+                            } p-2 rounded-lg`}
                         >
                           {availableRoom}
                         </button>
