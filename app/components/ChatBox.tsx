@@ -36,7 +36,8 @@ export default function ChatBox() {
 
     // Listen for incoming messages from the server
     useEffect(() => {
-      // Listen for messages from the server (e.g., history or initial messages)
+    
+      
       // socket.on('message', ({ sender, message, room }) => {
       //   console.log(`Received message from ${sender}: ${message}`);
     
