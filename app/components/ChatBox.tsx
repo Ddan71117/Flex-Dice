@@ -1,29 +1,28 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { socket } from "../lib/socketClient"; // assuming this is your socket connection setup
+import { socket } from "../lib/socketClient";
 import ChatForm from "./ChatForm";
 import ChatMessage from "./ChatMessage";
 import "../globals.css";
 
 export default function ChatBox() {
   const [room, setRoom] = useState("");
-  const [newMessage, setNewMessage] = useState('');
+  const [newMessage, setNewMessage] = useState("");
   const [rooms, setRooms] = useState<string[]>([]);
   const [userName, setUserName] = useState("");
   const [joined, setJoined] = useState(false);
-  const [messages, setMessages] = useState<
-    { [room: string]: { sender: string; message: string }[] }
-  >({});
+  const [messages, setMessages] = useState<{
+    [room: string]: { sender: string; message: string }[];
+  }>({});
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-
-
-  // Fetch available rooms when the component mounts
+  // Connect to the server and listen for events
   useEffect(() => {
     // Connect to the server
-    socket.on('connect', () => {
-      console.log('Connected to server');
+    socket.on("connect", () => {
+      console.log("Connected to server");
     });
 
     // Emit to get available rooms when the component mounts
@@ -34,116 +33,110 @@ export default function ChatBox() {
       setRooms(rooms);
     });
 
-    // Listen for incoming messages from the server
-    socket.on('newMessage', (data) => {
-        const { sender, message, room } = data;
-        console.log(`New message from ${sender}: ${message}`);
-    
-        // Update the state to add the new message to the current room's message list
-        setMessages((prevMessages) => {
-          const roomMessages = prevMessages[room] || [];
-          return {
-            ...prevMessages,
-            [room]: [...roomMessages, { sender, message }], // Add new message
-          };
-        });
-      });
-
-    // Listen for message history when joining a room
-    socket.on('messageHistory', (messages, room) => {
-      console.log('Message history:', messages, room);
-
-      setMessages((prevMessages) => ({
-        ...prevMessages,
-        [room]: messages, // Update the messages for the specific room
-      }));
-    });
-
     // Listen for user joined event
-    socket.on('user_joined', (message, room) => {
-      console.log('User joined:', message);
-  
-      // Update messages for the specific room when a user joins
+    socket.on("user_joined", (message, room) => {
+      console.log("User joined:", message);
+
       setMessages((prevMessages) => {
         const roomMessages = prevMessages[room] || [];
         return {
           ...prevMessages,
-          [room]: [...roomMessages, { sender: "system", message }],  // Adding the "system" message for user join
+          [room]: [...roomMessages, { sender: "system", message }],
         };
       });
     });
 
     // Listen for user leaving the room
-    socket.on('leave-room', ({ room, userName }) => {
+    socket.on("leave-room", ({ room, userName }) => {
       console.log(`User ${userName} left room ${room}`);
 
       setMessages((prevMessages) => {
         const roomMessages = prevMessages[room] || [];
         return {
           ...prevMessages,
-          [room]: [...roomMessages, { sender: "system", message: `${userName} left the room.` }], // Adding system message for leaving
+          [room]: [
+            ...roomMessages,
+            { sender: "system", message: `${userName} left the room.` },
+          ],
         };
       });
     });
 
-    // Disconnect event
-    socket.on('disconnect', () => {
-      console.log('Disconnected from server');
-    });
-
     // Cleanup listeners on unmount
     return () => {
-      socket.off('connect');
+      socket.off("connect");
       socket.off("availableRooms");
-      socket.off("join-room");
       socket.off("user_joined");
-      socket.off("message");
-      socket.off("user_joined");
-      socket.off("messageHistory");
       socket.off("leave-room");
-      socket.off('disconnect');
-      socket.off('newMessage');
-      socket.emit('leave-room', { room, userName });
+      socket.off("newMessage");
+      socket.off("messageHistory");
     };
+  }, []);
 
-  }, [room]);  // Dependency on room
-
+  // Fetch username from localStorage when component mounts
   useEffect(() => {
     const storedUsername = localStorage.getItem("username");
     if (storedUsername) {
       setUserName(storedUsername);
     }
+    setLoading(false); // Set loading to false once the username is retrieved
   }, []);
 
-  // Join room logic
-  // const handleJoinRoom = () => {
-  //   if (room && userName && !joined) {
-  //     console.log("Emitting join-room", { room, userName }); // Debug log
-  //     socket.emit("join-room", { room, userName });
-  //     setJoined(true);
-  //   }
-  // };
-  const handleJoinRoom = (room: any) => {
-    if (!userName) {
-      console.error("UserName is missing!");
-      return;
+  // Handle incoming messages from the server
+  useEffect(() => {
+    const handleNewMessage = ({ sender, message, room }: { sender: string; message: string; room: string }) => {
+      console.log(`New message from ${sender}: ${message}`);
+      setMessages((prevMessages) => {
+        const roomMessages = prevMessages[room] || [];
+        return {
+          ...prevMessages,
+          [room]: [...roomMessages, { sender, message }],
+        };
+      });
+    };
+
+    socket.on("newMessage", handleNewMessage);
+
+    // Cleanup listener when the component unmounts
+    return () => {
+      socket.off("newMessage", handleNewMessage);
+    };
+  }, []);
+
+  // Handle room joining and message history
+  useEffect(() => {
+    if (room && userName && !joined) {
+      console.log("Emitting join-room", { room, userName });
+      socket.emit("join-room", { room, userName });
+      setJoined(true);
+
+      // Fetch message history for the room after joining
+      socket.emit("get-message-history", room);
     }
-  
-    socket.emit('join-room', { room, userName });
-  
-    // After joining, fetch the room's message history
-    socket.on('messageHistory', (messages) => {
-      setMessages((prev) => ({
-        ...prev,
-        [room]: messages,
+
+    // Listen for message history and update the state
+    socket.on("messageHistory", (messages, room) => {
+      console.log("Message history:", messages, room);
+      setMessages((prevMessages) => ({
+        ...prevMessages,
+        [room]: messages, // Update the messages for the specific room
       }));
     });
-  };
-  
-  // //handle receiving messages
-  // const handleReceiveMessage = (message: string) => {
-  //   socket.emit("message", message);
-  // };
+
+    // Cleanup messageHistory listener when the room changes
+    return () => {
+      socket.off("messageHistory");
+    };
+  }, [room, userName, joined]);
+
+  // Handle username changes (if applicable)
+  useEffect(() => {
+    if (userName) {
+      console.log("Username is available: ", userName);
+    } else {
+      console.log("No username set yet.");
+    }
+  }, [userName]);
 
   // Send message logic
   const handleSendMessage = (message: any) => {
@@ -151,10 +144,10 @@ export default function ChatBox() {
       console.error("Room or UserName is missing");
       return;
     }
-    
+
     const data = { room, message, sender: userName };
-    
-    // Save message locally
+
+    // Save message locally (optimistic UI update)
     setMessages((prev) => {
       const roomMessages = prev[room] || [];
       return {
@@ -162,17 +155,15 @@ export default function ChatBox() {
         [room]: [...roomMessages, { sender: userName, message }],
       };
     });
-  
+
     // Emit message to the server
-    socket.emit('message', data);
+    socket.emit("message", data);
   };
-  
-  // Select a room from the list
+
   const handleSelectRoom = (selectedRoom: string) => {
     setRoom(selectedRoom);
   };
 
-  // Create a new room
   const handleCreateRoom = () => {
     if (room) {
       socket.emit("createRoom", room); // Emit the new room to the server
@@ -180,32 +171,42 @@ export default function ChatBox() {
     }
   };
 
-  // Remove a room
-  const handleRemoveRoom = (roomToRemove: string) => {
-    socket.emit("removeRoom", roomToRemove); // Emit room removal to the server
-    setRooms((prevRooms) => prevRooms.filter((r) => r !== roomToRemove)); // Update the rooms list after removing
-  };
-
-  // Handle leaving the room
   const handleLeaveRoom = () => {
     socket.emit("leave-room", room); // Handle leaving a room
     setRoom("");
     setJoined(false);
   };
 
-  // Open the chat modal
+  const handleRemoveRoom = (roomToRemove: string) => {
+    socket.emit("removeRoom", roomToRemove); // Emit room removal to the server
+    setRooms((prevRooms) => prevRooms.filter((r) => r !== roomToRemove)); // Update the rooms list after removing
+  };
+
+  const handleJoinRoom = () => {
+    if (room && userName && !joined) {
+      console.log("Emitting join-room", { room, userName });
+      socket.emit("join-room", { room, userName });
+      setJoined(true);
+
+      // Fetch message history for the room after joining
+      socket.emit("get-message-history", room);
+    }
+  };
+
   const openModal = () => {
     setIsModalOpen(true);
   };
 
-  // Close the chat modal
   const closeModal = () => {
     setIsModalOpen(false);
   };
 
+  if (loading) {
+    return <div>Loading...</div>; // Optionally show a loading indicator
+  }
+
   return (
     <div>
-      {/* Button to open the chat modal positioned at the lower-right */}
       <button
         onClick={openModal}
         className="fixed bottom-4 left-4 h-14 px-6 m-2 text-lg text-white transition-colors duration-150 bg-teal-500 rounded-lg focus:shadow-outline hover:bg-teal-600"
@@ -213,7 +214,6 @@ export default function ChatBox() {
         Open Chat Room
       </button>
 
-      {/* Modal */}
       {isModalOpen && (
         <div className="fixed bottom-4 left-4 w-50 max-w-3xl mx-auto p-4 bg-gray-800 border rounded-lg">
           <div className="bg-gray-800 p-6 rounded-lg w-80 sm:w-96 max-w-sm mx-auto">
@@ -221,14 +221,10 @@ export default function ChatBox() {
               Welcome {userName || "Guest"}!
             </h3>
 
-            {/* If not joined, show room list and userName input */}
             {!joined ? (
               <div className="flex flex-col">
-                {/* Available Rooms */}
                 <div className="mt-2 w-full max-h-[80px] overflow-y-auto">
-                  <h2 className="mt-2 font-bold text-white text-sm">
-                    Available Rooms listed:
-                  </h2>
+                  <h2 className="mt-2 font-bold text-white text-sm">Available Rooms listed:</h2>
                   <br />
                   <ul className="list-disc pl-4">
                     {rooms.map((availableRoom) => (
@@ -253,7 +249,6 @@ export default function ChatBox() {
                   </ul>
                 </div>
 
-                {/* Create Room */}
                 <div className="flex space-x-2">
                   <input
                     type="text"
@@ -270,7 +265,6 @@ export default function ChatBox() {
                   </button>
                 </div>
 
-                {/* Join Room */}
                 <button
                   className="p-2 mt-4 text-white bg-blue-500 rounded-lg"
                   onClick={handleJoinRoom}
@@ -281,9 +275,7 @@ export default function ChatBox() {
               </div>
             ) : (
               <div className="w-full max-w-3xl mx-auto">
-                <h1 className="mb-4 text-md text-white">
-                  You are in room: {room}
-                </h1>
+                <h1 className="mb-4 text-md text-white">You are in room: {room}</h1>
                 <div className="h-[200px] overflow-y-auto p-4 mb-4 bg-gray-200 border-2 text-black rounded-lg">
                   <div>
                     {messages[room]?.map((msg, index) => (
@@ -304,7 +296,6 @@ export default function ChatBox() {
               </div>
             )}
 
-            {/* Close Modal Button */}
             <button
               className="mt-4 bg-red-500 text-white px-4 py-2 rounded-lg w-full"
               onClick={closeModal}
