@@ -1,12 +1,10 @@
 "use client";
-
 import { ReactNode, useEffect, useState } from "react";
 import Nav from "./components/Nav";
 import NavPostLogin from "./components/NavPostLogin";
 import { robotoMono } from "./fonts";
 import "./globals.css";
 import { usePathname } from "next/navigation";
-import { SessionProvider } from "next-auth/react";
 
 type LayoutProps = {
   children: ReactNode;
@@ -23,7 +21,6 @@ export default function RootLayout({ children }: LayoutProps) {
   }, [pathname]);
 
   return (
-    <SessionProvider>
     <html lang="en">
       <body
         className={`${robotoMono.className} relative min-h-screen bg-cover bg-center bg-no-repeat`}
@@ -36,6 +33,5 @@ export default function RootLayout({ children }: LayoutProps) {
         {children}
       </body>
     </html>
-    </SessionProvider>
   );
 }
