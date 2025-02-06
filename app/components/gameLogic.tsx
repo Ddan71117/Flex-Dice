@@ -4,7 +4,6 @@ import getSession from "../lib/getSession";
 import { type User } from "next-auth";
 import "../globals.css";
 import { handleWin, handleLoss } from "../lib/actions";
-// import { Chicle } from 'next/font/google';
 
 type Player = {
   id: number;
@@ -94,7 +93,6 @@ export default function Game(setGameLog: React.Dispatch<React.SetStateAction<str
     }
   }, [winner]);
 
-  // Check for winner and distribute center pot
   useEffect(() => {
     if (winner === null) {
       const activePlayers = players.filter(player => player.id !== 0 && player.chips > 0);
@@ -137,30 +135,35 @@ export default function Game(setGameLog: React.Dispatch<React.SetStateAction<str
   const processResults = (rolls: string[], playerIndex: number) => {
     const newPlayers = [...players];
     const player = newPlayers[playerIndex];
-
+  
     rolls.forEach((roll) => {
       if (roll === 'L') {
-        let leftIndex = (playerIndex - 1 + players.length) % players.length;
-        if (newPlayers[leftIndex].id === 0) {
-          leftIndex = (leftIndex - 1 + players.length) % players.length;
+        // For 'L': chip goes clockwise (i.e. next index)
+        let clockwiseIndex = (playerIndex + 1) % newPlayers.length;
+        // If the next spot is the center pot, skip it.
+        if (newPlayers[clockwiseIndex].id === 0) {
+          clockwiseIndex = (clockwiseIndex + 1) % newPlayers.length;
         }
-        newPlayers[leftIndex].chips++;
+        newPlayers[clockwiseIndex].chips++;
         player.chips--;
       } else if (roll === 'R') {
-        let rightIndex = (playerIndex + 1) % players.length;
-        if (newPlayers[rightIndex].id === 0) {
-          rightIndex = (rightIndex + 1) % players.length;
+        // For 'R': chip goes counter-clockwise (i.e. previous index)
+        let counterClockwiseIndex = (playerIndex - 1 + newPlayers.length) % newPlayers.length;
+        // If the previous spot is the center pot, skip it.
+        if (newPlayers[counterClockwiseIndex].id === 0) {
+          counterClockwiseIndex = (counterClockwiseIndex - 1 + newPlayers.length) % newPlayers.length;
         }
-        newPlayers[rightIndex].chips++;
+        newPlayers[counterClockwiseIndex].chips++;
         player.chips--;
       } else if (roll === 'C') {
+        // Chip goes to center pot
         newPlayers.find(p => p.id === 0)!.chips++;
         player.chips--;
       }
     });
-
+  
     setPlayers(newPlayers);
-
+  
     setTimeout(() => {
       setGameState(prev => ({ ...prev, isProcessingResults: false }));
       nextTurn();
