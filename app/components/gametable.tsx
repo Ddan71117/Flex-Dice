@@ -1,7 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import Game from "./gameLogic";
-import { useSession } from "next-auth/react";
 
 type PokerTableProps = {
   setGameLog: React.Dispatch<React.SetStateAction<string[]>>;
@@ -12,7 +11,6 @@ const resetGame = () => {
 }
 
 const PokerTable: React.FC<PokerTableProps> = ({ setGameLog }) => {
-  const { data: session } = useSession();
   const {
     user,
     players,
@@ -77,7 +75,8 @@ const PokerTable: React.FC<PokerTableProps> = ({ setGameLog }) => {
     });
 
     setPlayerAvatars(avatars);
-  }, [session, players, user.id]);
+
+  }, [players, user.id]);
 
   const getChipStackImage = (chips: number): string => {
     if (chips <= 0) return "";
