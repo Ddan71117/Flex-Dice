@@ -75,7 +75,7 @@ const MainDropdown: React.FC = () => {
   }, []);
 
   return (
-    <div className="fixed top-24 left-1/2 transform -translate-x-1/2 z-40 flex items-center space-x-3">
+    <div className="fixed top-8 left-1/2 transform -translate-x-1/2 z-40 flex items-center space-x-3">
       {isLoggedIn && selectedAvatar && (
         <img
           className="w-32 h-32 rounded-full ring-2 ring-blue-300 dark:ring-red-500 shadow-lg"
