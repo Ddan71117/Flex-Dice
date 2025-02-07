@@ -79,7 +79,7 @@ export const { auth, signIn, signOut } =NextAuth({
       }
       session.user.id = token.id as string;
       session.user.username = token.username as string;
-      console.log('session', session);
+      
       return session;
     },
   },
