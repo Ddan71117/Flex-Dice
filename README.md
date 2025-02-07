@@ -34,6 +34,10 @@ Try our Game!:
 
 [Flex-Dice](https://flex-dice.vercel.app/)
 
+Link to Socket Repo for live chat:
+
+[Socket Server](https://github.com/mvoidets/chatSocket)
+
 ## Tests
 
 All testing was done by contributing developers and OpenAI.
